@@ -1,0 +1,331 @@
+/* ==========================================================
+   Simple Persona — 전체화면 모달, 목업 레이아웃
+   ========================================================== */
+
+/* 기본 페르소나 패널: 확장 활성화 상태일 때만 숨김 */
+body.sp-active #PersonaManagement {
+    display: none !important;
+}
+
+/* ── 오버레이: 화면 꽉 채우기 ── */
+#sp-overlay {
+    display: none;
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 99999 !important;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    align-items: flex-end !important;
+    justify-content: center !important;
+}
+#sp-overlay.sp-visible {
+    display: flex !important;
+}
+
+/* ── 모달: 화면 전체 꽉 채우기 ── */
+#sp-modal {
+    width: 100% !important;
+    height: 96vh !important;
+    max-height: 96vh !important;
+    background: var(--SmartThemeBlurTintColor, #f5f5f0);
+    color: var(--SmartThemeBodyColor, #222);
+    border-radius: 20px 20px 0 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 -8px 40px rgba(0,0,0,0.3);
+    animation: sp-slide-up 0.25s cubic-bezier(0.34, 1.1, 0.64, 1);
+}
+
+@keyframes sp-slide-up {
+    from { transform: translateY(100%); opacity: 0.5; }
+    to   { transform: translateY(0);    opacity: 1; }
+}
+
+/* ── 헤더 ── */
+#sp-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid var(--SmartThemeBorderColor, rgba(0,0,0,0.08));
+    flex-shrink: 0;
+}
+#sp-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--SmartThemeBodyColor, #111);
+}
+#sp-close {
+    background: color-mix(in srgb, var(--SmartThemeBodyColor, #000) 8%, transparent);
+    border: none;
+    cursor: pointer;
+    color: var(--SmartThemeBodyColor, #555);
+    font-size: 1rem;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+}
+#sp-close:hover {
+    background: color-mix(in srgb, var(--SmartThemeBodyColor, #000) 15%, transparent);
+}
+
+/* ── 현재 페르소나 배너 ── */
+#sp-current {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 20px;
+    background: color-mix(in srgb, var(--SmartThemeBodyColor, #000) 4%, transparent);
+    border-bottom: 1px solid var(--SmartThemeBorderColor, rgba(0,0,0,0.08));
+    flex-shrink: 0;
+}
+#sp-current-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--SmartThemeBorderColor, rgba(0,0,0,0.15));
+    flex-shrink: 0;
+}
+#sp-current-info { flex: 1; min-width: 0; }
+#sp-current-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--SmartThemeBodyColor, #111);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+#sp-current-sub {
+    font-size: 0.75rem;
+    color: var(--SmartThemeBodyColor, #888);
+    opacity: 0.6;
+    margin-top: 2px;
+}
+#sp-current-actions { display: flex; gap: 8px; flex-shrink: 0; }
+.sp-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: color-mix(in srgb, var(--SmartThemeBodyColor, #000) 6%, transparent);
+    border: 1px solid var(--SmartThemeBorderColor, rgba(0,0,0,0.1));
+    border-radius: 10px;
+    color: var(--SmartThemeBodyColor, #333);
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.sp-icon-btn svg { width: 16px; height: 16px; }
+.sp-icon-btn:hover {
+    background: color-mix(in srgb, var(--SmartThemeBodyColor, #000) 12%, transparent);
+}
+
+/* ── 툴바 ── */
+#sp-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--SmartThemeBorderColor, rgba(0,0,0,0.08));
+    flex-shrink: 0;
+}
+#sp-search-wrap { flex: 1; position: relative; }
+.sp-search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 15px;
+    height: 15px;
+    opacity: 0.4;
+    color: var(--SmartThemeBodyColor, #555);
+    pointer-events: none;
+}
+#sp-search {
+    width: 100%;
+    padding: 9px 10px 9px 34px;
+    background: color-mix(in srgb, var(--SmartThemeBodyColor, #000) 6%, transparent);
+    border: 1.5px solid var(--SmartThemeBorderColor, rgba(0,0,0,0.12));
+    border-radius: 12px;
+    color: var(--SmartThemeBodyColor, #111);
+    font-size: 0.875rem;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.15s;
+}
+#sp-search::placeholder { opacity: 0.4; }
+#sp-search:focus {
+    border-color: var(--SmartThemeQuoteColor, var(--SmartThemeEmColor, rgba(0,0,0,0.4)));
+}
+.sp-tool-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 9px 13px;
+    background: color-mix(in srgb, var(--SmartThemeBodyColor, #000) 6%, transparent);
+    border: 1.5px solid var(--SmartThemeBorderColor, rgba(0,0,0,0.12));
+    border-radius: 12px;
+    color: var(--SmartThemeBodyColor, #333);
+    font-size: 0.8rem;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: background 0.15s;
+}
+.sp-tool-btn svg { width: 13px; height: 13px; }
+.sp-tool-btn:hover {
+    background: color-mix(in srgb, var(--SmartThemeBodyColor, #000) 12%, transparent);
+}
+
+/* ── 그리드: 4열 ── */
+#sp-grid {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    align-content: start;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+}
+
+/* ── 카드 ── */
+.sp-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 6px 5px 8px;
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--SmartThemeBodyColor, #000) 5%, transparent);
+    border: 1.5px solid var(--SmartThemeBorderColor, rgba(0,0,0,0.1));
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    gap: 4px;
+    position: relative;
+}
+.sp-card:active { transform: scale(0.96); }
+.sp-card.sp-card--active {
+    border-color: var(--SmartThemeQuoteColor, var(--SmartThemeEmColor, #6ee7b7));
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--SmartThemeQuoteColor, #6ee7b7) 35%, transparent);
+}
+
+/* ── 카드 이미지 (정사각형 강제) ── */
+.sp-card-img-wrap {
+    position: relative;
+    width: 100%;
+    padding-top: 100%;
+    border-radius: 9px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+.sp-card-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.sp-card-badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--SmartThemeQuoteColor, #6ee7b7);
+    color: #fff;
+    font-size: 0.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}
+
+/* ── 카드 텍스트 ── */
+.sp-card-name {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--SmartThemeBodyColor, #111);
+    text-align: center;
+    width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    line-height: 1.3;
+}
+.sp-card-sub {
+    font-size: 0.62rem;
+    color: var(--SmartThemeBodyColor, #666);
+    opacity: 0.6;
+    text-align: center;
+    width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+/* ── 카드 액션 버튼 ── */
+.sp-card-actions {
+    display: flex;
+    gap: 3px;
+    width: 100%;
+    justify-content: center;
+    margin-top: 1px;
+}
+.sp-card-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--SmartThemeBodyColor, #000) 7%, transparent);
+    border: 1px solid var(--SmartThemeBorderColor, rgba(0,0,0,0.1));
+    color: var(--SmartThemeBodyColor, #444);
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.sp-card-btn svg { width: 11px; height: 11px; }
+.sp-card-btn:hover {
+    background: color-mix(in srgb, var(--SmartThemeBodyColor, #000) 15%, transparent);
+}
+
+/* ── 빈 상태 ── */
+#sp-empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 48px 20px;
+    opacity: 0.4;
+    font-size: 0.9rem;
+    color: var(--SmartThemeBodyColor, #666);
+}
+
+/* ── 토스트 ── */
+#sp-toast {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%) translateY(16px);
+    background: var(--SmartThemeBlurTintColor, #2a2a3e);
+    color: var(--SmartThemeBodyColor, #eee);
+    border: 1px solid var(--SmartThemeBorderColor, rgba(255,255,255,0.15));
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-size: 0.875rem;
+    z-index: 100010;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s, transform 0.2s;
+    white-space: nowrap;
+}
+#sp-toast.sp-toast-show { opacity: 1; transform: translateX(-50%) translateY(0); }
+#sp-toast.sp-toast-error { color: #fca5a5; }
