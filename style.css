@@ -1,0 +1,472 @@
+/* ═══ Simple Persona — Persona Manager ══════════════════════════
+   색상 전부 ST 테마 변수 사용 (하드코딩 없음)
+   --SmartThemeBodyColor       = 텍스트 색
+   --SmartThemeBlurTintColor   = 패널/배경 색
+   --SmartThemeBorderColor     = 테두리 색
+   --SmartThemeQuoteColor      = 강조색
+═══════════════════════════════════════════════════════════════ */
+
+:root {
+    --sp-text:      var(--SmartThemeBodyColor, #111);
+    --sp-bg:        var(--SmartThemeBlurTintColor, #ffffff);
+    --sp-bg2:       color-mix(in srgb, var(--SmartThemeBodyColor,#000) 5%, transparent);
+    --sp-bg3:       color-mix(in srgb, var(--SmartThemeBodyColor,#000) 9%, transparent);
+    --sp-border:    var(--SmartThemeBorderColor, rgba(0,0,0,0.1));
+    --sp-accent:    var(--SmartThemeQuoteColor, var(--SmartThemeEmColor, #6366f1));
+    --sp-muted:     color-mix(in srgb, var(--SmartThemeBodyColor,#000) 45%, transparent);
+    --sp-radius-lg: 22px;
+    --sp-radius-md: 14px;
+    --sp-radius-sm: 10px;
+}
+
+body.sp-active #PersonaManagement { display: none !important; }
+
+/* ── 오버레이 ── */
+#sp-overlay {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important; height: 100vh !important;
+    z-index: 2147483647 !important;
+    background: rgba(0,0,0,0.3) !important;
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+    display: none;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* ── 모달 ── */
+#sp-modal {
+    position: relative !important;
+    width: 96vw !important;
+    max-width: 480px !important;
+    height: 92vh !important;
+    background: var(--sp-bg) !important;
+    color: var(--sp-text) !important;
+    border-radius: var(--sp-radius-lg) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.25), 0 2px 8px rgba(0,0,0,0.1) !important;
+    border: 1px solid var(--sp-border) !important;
+}
+
+/* ── 헤더 ── */
+#sp-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 20px 20px 14px;
+    flex-shrink: 0;
+}
+#sp-header-text { display: flex; flex-direction: column; gap: 2px; }
+#sp-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--sp-text);
+    letter-spacing: -0.4px;
+    line-height: 1.2;
+}
+#sp-subtitle {
+    font-size: 0.73rem;
+    color: var(--sp-muted);
+    line-height: 1.3;
+}
+#sp-close {
+    background: var(--sp-bg2);
+    border: none; cursor: pointer;
+    color: var(--sp-muted);
+    font-size: 0.85rem; font-weight: 600;
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 3px;
+    transition: background 0.15s;
+}
+#sp-close:hover { background: var(--sp-bg3); }
+
+/* ── 액션 버튼 행 ── */
+#sp-action-bar {
+    display: flex;
+    gap: 7px;
+    padding: 0 20px 14px;
+    flex-shrink: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+#sp-action-bar::-webkit-scrollbar { display: none; }
+
+.sp-action-btn {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 5px; flex-shrink: 0;
+    min-width: 62px; padding: 10px 8px;
+    background: var(--sp-bg2);
+    border: 1px solid var(--sp-border);
+    border-radius: var(--sp-radius-md);
+    color: var(--sp-text);
+    font-size: 0.67rem; font-weight: 500;
+    cursor: pointer; font-family: inherit;
+    transition: background 0.15s, transform 0.1s;
+}
+.sp-action-btn:hover { background: var(--sp-bg3); }
+.sp-action-btn:active { transform: scale(0.95); }
+.sp-action-btn svg { width: 20px; height: 20px; }
+
+/* ── 현재 페르소나 배너 ── */
+#sp-current {
+    display: flex; align-items: center; gap: 13px;
+    padding: 12px 14px;
+    margin: 0 20px 12px;
+    background: var(--sp-bg2);
+    border: 1px solid var(--sp-border);
+    border-radius: var(--sp-radius-md);
+    flex-shrink: 0;
+}
+#sp-current-avatar {
+    width: 50px; height: 50px; border-radius: 50%;
+    object-fit: cover; flex-shrink: 0;
+    border: 2px solid var(--sp-border);
+}
+#sp-current-info { flex: 1; min-width: 0; }
+#sp-current-name {
+    font-size: 0.96rem; font-weight: 700;
+    color: var(--sp-text);
+    overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+}
+#sp-current-sub {
+    font-size: 0.71rem; color: var(--sp-muted);
+    margin-top: 2px;
+    overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+}
+#sp-current-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.sp-cur-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--sp-bg2);
+    border: 1px solid var(--sp-border);
+    color: var(--sp-muted);
+    cursor: pointer; transition: background 0.15s, color 0.15s;
+}
+.sp-cur-btn:hover { background: var(--sp-bg3); color: var(--sp-text); }
+.sp-cur-btn svg { width: 15px; height: 15px; }
+
+/* ── 검색 + 정렬 툴바 ── */
+#sp-toolbar {
+    display: flex; align-items: center; gap: 7px;
+    padding: 0 20px 10px;
+    flex-shrink: 0;
+}
+#sp-search-wrap { flex: 1; position: relative; }
+.sp-search-icon {
+    position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+    width: 14px; height: 14px; color: var(--sp-muted); pointer-events: none;
+}
+#sp-search {
+    width: 100%; padding: 8px 10px 8px 30px; box-sizing: border-box;
+    background: var(--sp-bg2);
+    border: 1px solid var(--sp-border);
+    border-radius: var(--sp-radius-sm);
+    color: var(--sp-text);
+    font-size: 0.83rem; outline: none; font-family: inherit;
+    transition: background 0.15s, border-color 0.15s;
+}
+#sp-search::placeholder { color: var(--sp-muted); }
+#sp-search:focus { background: var(--sp-bg3); border-color: var(--sp-accent); }
+
+#sp-sort-wrap { position: relative; flex-shrink: 0; }
+#sp-sort {
+    appearance: none;
+    padding: 8px 26px 8px 10px; box-sizing: border-box;
+    background: var(--sp-bg2);
+    border: 1px solid var(--sp-border);
+    border-radius: var(--sp-radius-sm);
+    color: var(--sp-text);
+    font-size: 0.77rem; outline: none; font-family: inherit; cursor: pointer;
+}
+.sp-sort-arrow {
+    position: absolute; right: 7px; top: 50%; transform: translateY(-50%);
+    width: 11px; height: 11px; pointer-events: none; color: var(--sp-muted);
+}
+.sp-toolbar-icon-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 34px; height: 34px; flex-shrink: 0;
+    background: var(--sp-bg2);
+    border: 1px solid var(--sp-border);
+    border-radius: var(--sp-radius-sm);
+    color: var(--sp-muted); cursor: pointer; transition: background 0.15s;
+}
+.sp-toolbar-icon-btn:hover { background: var(--sp-bg3); color: var(--sp-text); }
+.sp-toolbar-icon-btn svg { width: 14px; height: 14px; }
+
+/* ── 그리드 ── */
+#sp-grid {
+    flex: 1 1 auto; overflow-y: auto; padding: 4px 20px 14px;
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 10px; align-content: start;
+    -webkit-overflow-scrolling: touch;
+}
+#sp-grid::-webkit-scrollbar { width: 3px; }
+#sp-grid::-webkit-scrollbar-thumb { background: var(--sp-border); border-radius: 3px; }
+
+/* ── 카드 ── */
+.sp-card {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 0 0 7px; border-radius: 16px; gap: 5px;
+    background: var(--sp-bg2);
+    border: 1.5px solid var(--sp-border);
+    cursor: pointer; position: relative; overflow: hidden;
+    transition: transform 0.12s, box-shadow 0.12s, border-color 0.15s;
+}
+.sp-card:hover {
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+    border-color: color-mix(in srgb, var(--sp-text) 25%, transparent);
+}
+.sp-card:active { transform: scale(0.96); }
+.sp-card.sp-card--active {
+    border-color: var(--sp-accent);
+    box-shadow: 0 0 0 2.5px color-mix(in srgb, var(--sp-accent) 22%, transparent);
+}
+
+/* 카드 이미지 */
+.sp-card-img-wrap {
+    position: relative; width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: 0; overflow: hidden; flex-shrink: 0;
+}
+.sp-card-img {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover;
+}
+
+/* 즐겨찾기 별 */
+.sp-card-star {
+    position: absolute; top: 5px; left: 5px;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: rgba(255,255,255,0.85);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; z-index: 2; border: none; padding: 0;
+    backdrop-filter: blur(4px);
+    transition: background 0.15s;
+}
+.sp-card-star svg { width: 11px; height: 11px; }
+.sp-card-star:hover { background: rgba(255,255,255,1); }
+.sp-card-star.starred svg { fill: #f59e0b; stroke: #f59e0b; }
+
+/* 기본 페르소나 배지 */
+.sp-card-badge {
+    position: absolute; top: 5px; right: 5px;
+    width: 19px; height: 19px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; z-index: 2;
+}
+.sp-card-badge svg { width: 10px; height: 10px; stroke: #fff; }
+
+.sp-card-name {
+    font-size: 0.72rem; font-weight: 700;
+    color: var(--sp-text);
+    text-align: center; width: 100%;
+    overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+    padding: 0 5px;
+}
+.sp-card-sub {
+    font-size: 0.62rem; color: var(--sp-muted);
+    text-align: center; width: 100%;
+    overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+    padding: 0 5px; margin-top: -3px;
+}
+.sp-card-actions {
+    display: flex; gap: 4px; width: 100%;
+    justify-content: center; padding: 0 4px;
+}
+.sp-card-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 27px; height: 27px; border-radius: 8px;
+    background: var(--sp-bg3);
+    border: none; color: var(--sp-muted);
+    cursor: pointer; transition: background 0.12s, color 0.12s;
+}
+.sp-card-btn:hover { background: var(--sp-bg2); color: var(--sp-text); }
+.sp-card-btn svg { width: 12px; height: 12px; }
+.sp-card-btn.sp-card-delete:hover { color: #ef4444; background: rgba(239,68,68,0.1); }
+
+/* ── 푸터 ── */
+#sp-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 9px 20px;
+    border-top: 1px solid var(--sp-border);
+    flex-shrink: 0;
+}
+#sp-count { font-size: 0.76rem; color: var(--sp-muted); }
+.sp-footer-icon-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border-radius: 7px;
+    background: transparent; border: none;
+    color: var(--sp-muted); cursor: pointer; transition: color 0.15s;
+}
+.sp-footer-icon-btn:hover { color: var(--sp-text); }
+.sp-footer-icon-btn svg { width: 16px; height: 16px; }
+
+#sp-empty {
+    grid-column: 1/-1; text-align: center; padding: 60px 20px;
+    color: var(--sp-muted); font-size: 0.88rem;
+}
+
+/* ── 다이얼로그 ── */
+.sp-dialog {
+    position: absolute; inset: 0; z-index: 20;
+    background: var(--sp-bg);
+    display: flex; flex-direction: column;
+    overflow: hidden; border-radius: var(--sp-radius-lg);
+}
+.sp-dialog-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid var(--sp-border);
+    flex-shrink: 0;
+}
+.sp-dialog-header h3 {
+    font-size: 1rem; font-weight: 700;
+    margin: 0; color: var(--sp-text);
+}
+.sp-dialog-close-btn {
+    background: var(--sp-bg2); border: none; cursor: pointer;
+    color: var(--sp-muted);
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.85rem; transition: background 0.15s;
+}
+.sp-dialog-close-btn:hover { background: var(--sp-bg3); }
+.sp-dialog-body {
+    flex: 1; overflow-y: auto; padding: 18px 20px;
+    display: flex; flex-direction: column; gap: 14px;
+}
+.sp-dialog-label { display: flex; flex-direction: column; gap: 5px; }
+.sp-dialog-label > span { font-size: 0.77rem; color: var(--sp-muted); font-weight: 500; }
+.sp-dialog-input,
+.sp-dialog-textarea,
+.sp-dialog-select {
+    padding: 10px 12px; border-radius: var(--sp-radius-sm);
+    background: var(--sp-bg2);
+    border: 1px solid var(--sp-border);
+    color: var(--sp-text);
+    font-size: 0.875rem; outline: none; font-family: inherit;
+    box-sizing: border-box; width: 100%;
+    transition: border-color 0.15s;
+}
+.sp-dialog-input:focus,
+.sp-dialog-textarea:focus { border-color: var(--sp-accent); }
+.sp-dialog-textarea { min-height: 110px; resize: vertical; line-height: 1.55; }
+.sp-dialog-select { cursor: pointer; }
+.sp-dialog-avatar-preview {
+    width: 76px; height: 76px; border-radius: 50%;
+    object-fit: cover; border: 2px solid var(--sp-border);
+    cursor: pointer; display: block; transition: opacity 0.15s;
+}
+.sp-dialog-avatar-preview:hover { opacity: 0.78; }
+.sp-dialog-footer {
+    display: flex; gap: 8px; padding: 12px 20px;
+    border-top: 1px solid var(--sp-border); flex-shrink: 0;
+}
+.sp-btn-primary {
+    flex: 1; padding: 11px;
+    background: var(--sp-text);
+    border: none; border-radius: var(--sp-radius-md);
+    color: var(--sp-bg); font-size: 0.875rem; font-weight: 700;
+    cursor: pointer; font-family: inherit; transition: opacity 0.15s;
+}
+.sp-btn-primary:hover { opacity: 0.82; }
+.sp-btn-secondary {
+    flex: 1; padding: 11px;
+    background: var(--sp-bg2);
+    border: 1px solid var(--sp-border);
+    border-radius: var(--sp-radius-md);
+    color: var(--sp-text); font-size: 0.875rem;
+    cursor: pointer; font-family: inherit; transition: background 0.15s;
+    display: flex; align-items: center; gap: 6px;
+}
+.sp-btn-secondary:hover { background: var(--sp-bg3); }
+.sp-btn-secondary svg { width: 15px; height: 15px; flex-shrink: 0; }
+.sp-btn-danger {
+    flex: 1; padding: 11px;
+    background: #ef4444; border: none; border-radius: var(--sp-radius-md);
+    color: #fff; font-size: 0.875rem; font-weight: 700;
+    cursor: pointer; font-family: inherit; transition: opacity 0.15s;
+}
+.sp-btn-danger:hover { opacity: 0.85; }
+
+/* ── 내보내기 포맷 선택 시트 ── */
+.sp-export-sheet {
+    position: absolute; inset: 0; z-index: 25;
+    background: rgba(0,0,0,0.3);
+    display: flex; align-items: flex-end;
+    border-radius: var(--sp-radius-lg);
+}
+.sp-export-sheet-inner {
+    width: 100%; background: var(--sp-bg);
+    border-radius: var(--sp-radius-lg) var(--sp-radius-lg) 0 0;
+    padding: 14px 20px 22px;
+    display: flex; flex-direction: column; gap: 8px;
+    border-top: 1px solid var(--sp-border);
+}
+.sp-export-sheet-title {
+    font-size: 0.72rem; font-weight: 600; color: var(--sp-muted);
+    text-align: center; margin-bottom: 4px;
+    text-transform: uppercase; letter-spacing: 0.04em;
+}
+.sp-export-opt-btn {
+    width: 100%; padding: 13px;
+    background: var(--sp-bg2); border: 1px solid var(--sp-border);
+    border-radius: var(--sp-radius-md);
+    font-size: 0.9rem; font-weight: 600; color: var(--sp-text);
+    cursor: pointer; font-family: inherit; transition: background 0.15s; text-align: center;
+}
+.sp-export-opt-btn:hover { background: var(--sp-bg3); }
+.sp-export-cancel-btn {
+    width: 100%; padding: 13px;
+    background: var(--sp-bg2); border: 1px solid var(--sp-border);
+    border-radius: var(--sp-radius-md);
+    font-size: 0.9rem; font-weight: 600; color: #ef4444;
+    cursor: pointer; font-family: inherit; transition: background 0.15s; margin-top: 2px;
+}
+
+/* ── 파일 입력 ── */
+#sp-import-file, #sp-new-avatar-file, #sp-edit-avatar-file { display: none; }
+
+/* ── 토스트 ── */
+#sp-toast {
+    position: fixed; bottom: 32px; left: 50%;
+    transform: translateX(-50%) translateY(16px);
+    background: color-mix(in srgb, var(--sp-text) 90%, transparent);
+    color: var(--sp-bg);
+    border-radius: 12px; padding: 9px 20px;
+    font-size: 0.875rem;
+    z-index: 2147483647; opacity: 0; pointer-events: none;
+    transition: opacity 0.2s, transform 0.2s;
+    white-space: nowrap; max-width: 90vw;
+}
+#sp-toast.sp-toast-show { opacity: 1; transform: translateX(-50%) translateY(0); }
+#sp-toast.sp-toast-error { background: rgba(185,28,28,0.95); color: #fff; }
+
+/* ── 확장 탭 설정 ── */
+#sp-settings-block .sp-drawer-toggle {
+    display: flex; align-items: center; justify-content: space-between;
+    cursor: pointer; padding: 6px 0; user-select: none;
+}
+
+/* ── 확인 다이얼로그 ── */
+.sp-confirm-dialog {
+    position: absolute; inset: 0; z-index: 30;
+    background: rgba(0,0,0,0.35);
+    display: flex; align-items: center; justify-content: center;
+    border-radius: var(--sp-radius-lg);
+}
+.sp-confirm-box {
+    background: var(--sp-bg); color: var(--sp-text);
+    border-radius: 18px; padding: 22px 20px 18px;
+    max-width: 270px; width: 90%;
+    border: 1px solid var(--sp-border);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+}
+.sp-confirm-box h4 { margin: 0 0 9px; font-size: 0.94rem; font-weight: 700; }
+.sp-confirm-box p { margin: 0 0 16px; font-size: 0.81rem; color: var(--sp-muted); line-height: 1.5; }
+.sp-confirm-box .sp-confirm-btns { display: flex; gap: 8px; }
