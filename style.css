@@ -1,0 +1,400 @@
+/* ─── Simple Persona Extension ──────────────────────────────────────────────── */
+/* Uses SillyTavern CSS variables so it always matches the active theme          */
+
+/* ── Overlay ── */
+#sp-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(4px);
+    align-items: center;
+    justify-content: center;
+    animation: sp-fade-in 0.18s ease;
+}
+#sp-overlay.sp-visible {
+    display: flex;
+}
+
+@keyframes sp-fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* ── Modal ── */
+#sp-modal {
+    background: var(--SmartThemeBlurTintColor, var(--grey-800, #1e1e2e));
+    color: var(--SmartThemeBodyColor, #e0e0e0);
+    border: 1px solid var(--SmartThemeBorderColor, rgba(255,255,255,0.1));
+    border-radius: 16px;
+    width: min(480px, 94vw);
+    max-height: 88vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+    overflow: hidden;
+    animation: sp-slide-up 0.22s cubic-bezier(0.34, 1.2, 0.64, 1);
+}
+
+@keyframes sp-slide-up {
+    from { opacity: 0; transform: translateY(20px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ── Header ── */
+#sp-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid var(--SmartThemeBorderColor, rgba(255,255,255,0.08));
+    flex-shrink: 0;
+}
+#sp-title {
+    font-size: 1.15rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: var(--SmartThemeBodyColor, #e0e0e0);
+}
+#sp-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--SmartThemeBodyColor, #aaa);
+    font-size: 1.1rem;
+    padding: 4px 8px;
+    border-radius: 8px;
+    line-height: 1;
+    opacity: 0.6;
+    transition: opacity 0.15s, background 0.15s;
+}
+#sp-close:hover {
+    opacity: 1;
+    background: var(--SmartThemeBodyColor05, rgba(255,255,255,0.08));
+}
+
+/* ── Current persona banner ── */
+#sp-current {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 20px;
+    background: var(--SmartThemeBodyColor05, rgba(255,255,255,0.04));
+    border-bottom: 1px solid var(--SmartThemeBorderColor, rgba(255,255,255,0.08));
+    flex-shrink: 0;
+}
+#sp-current-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--SmartThemeBorderColor, rgba(255,255,255,0.15));
+    flex-shrink: 0;
+    background: var(--SmartThemeBodyColor10, rgba(255,255,255,0.1));
+}
+#sp-current-info {
+    flex: 1;
+    min-width: 0;
+}
+#sp-current-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--SmartThemeBodyColor, #e0e0e0);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+#sp-current-sub {
+    font-size: 0.75rem;
+    color: var(--SmartThemeBodyColor, #aaa);
+    opacity: 0.55;
+    margin-top: 2px;
+}
+#sp-current-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+/* ── Toolbar ── */
+#sp-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--SmartThemeBorderColor, rgba(255,255,255,0.08));
+    flex-shrink: 0;
+}
+#sp-search-wrap {
+    flex: 1;
+    position: relative;
+}
+.sp-search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 15px;
+    height: 15px;
+    opacity: 0.45;
+    color: var(--SmartThemeBodyColor, #aaa);
+    pointer-events: none;
+}
+#sp-search {
+    width: 100%;
+    padding: 8px 12px 8px 34px;
+    background: var(--SmartThemeBodyColor05, rgba(255,255,255,0.06));
+    border: 1px solid var(--SmartThemeBorderColor, rgba(255,255,255,0.1));
+    border-radius: 10px;
+    color: var(--SmartThemeBodyColor, #e0e0e0);
+    font-size: 0.875rem;
+    outline: none;
+    transition: border-color 0.15s;
+    box-sizing: border-box;
+}
+#sp-search::placeholder {
+    opacity: 0.4;
+    color: var(--SmartThemeBodyColor, #aaa);
+}
+#sp-search:focus {
+    border-color: var(--SmartThemeQuoteColor, var(--SmartThemeEmColor, rgba(255,255,255,0.35)));
+}
+
+/* ── Buttons ── */
+.sp-tool-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    background: var(--SmartThemeBodyColor05, rgba(255,255,255,0.07));
+    border: 1px solid var(--SmartThemeBorderColor, rgba(255,255,255,0.12));
+    border-radius: 10px;
+    color: var(--SmartThemeBodyColor, #e0e0e0);
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.sp-tool-btn svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+}
+.sp-tool-btn:hover {
+    background: var(--SmartThemeBodyColor10, rgba(255,255,255,0.13));
+    border-color: var(--SmartThemeBodyColor, rgba(255,255,255,0.25));
+}
+
+.sp-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    background: var(--SmartThemeBodyColor05, rgba(255,255,255,0.06));
+    border: 1px solid var(--SmartThemeBorderColor, rgba(255,255,255,0.1));
+    border-radius: 9px;
+    color: var(--SmartThemeBodyColor, #e0e0e0);
+    cursor: pointer;
+    transition: background 0.15s;
+    padding: 0;
+}
+.sp-icon-btn svg {
+    width: 15px;
+    height: 15px;
+}
+.sp-icon-btn:hover {
+    background: var(--SmartThemeBodyColor10, rgba(255,255,255,0.13));
+}
+
+/* ── Grid ── */
+#sp-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 12px;
+    padding: 16px;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+}
+
+/* Custom scrollbar */
+#sp-grid::-webkit-scrollbar { width: 5px; }
+#sp-grid::-webkit-scrollbar-track { background: transparent; }
+#sp-grid::-webkit-scrollbar-thumb {
+    background: var(--SmartThemeBodyColor, rgba(255,255,255,0.2));
+    opacity: 0.3;
+    border-radius: 3px;
+}
+
+#sp-empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 40px 0;
+    opacity: 0.45;
+    font-size: 0.875rem;
+    color: var(--SmartThemeBodyColor, #aaa);
+}
+
+/* ── Cards ── */
+.sp-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 8px 10px;
+    border-radius: 12px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, transform 0.12s;
+    background: var(--SmartThemeBodyColor05, rgba(255,255,255,0.04));
+    position: relative;
+}
+.sp-card:hover {
+    background: var(--SmartThemeBodyColor10, rgba(255,255,255,0.09));
+    border-color: var(--SmartThemeBorderColor, rgba(255,255,255,0.12));
+    transform: translateY(-2px);
+}
+.sp-card--active {
+    border-color: var(--SmartThemeQuoteColor, var(--SmartThemeEmColor, rgba(255,255,255,0.4)));
+    background: var(--SmartThemeBodyColor10, rgba(255,255,255,0.08));
+}
+
+.sp-card-img-wrap {
+    position: relative;
+    width: 68px;
+    height: 68px;
+    flex-shrink: 0;
+}
+.sp-card-img {
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--SmartThemeBorderColor, rgba(255,255,255,0.1));
+    background: var(--SmartThemeBodyColor10, rgba(255,255,255,0.1));
+    display: block;
+}
+.sp-card--active .sp-card-img {
+    border-color: var(--SmartThemeQuoteColor, var(--SmartThemeEmColor, rgba(255,255,255,0.5)));
+}
+
+.sp-card-badge {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--SmartThemeQuoteColor, var(--SmartThemeEmColor, #7c7cff));
+    color: #fff;
+    font-size: 0.65rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--SmartThemeBlurTintColor, #1e1e2e);
+    font-weight: 700;
+}
+
+.sp-card-name {
+    font-size: 0.78rem;
+    color: var(--SmartThemeBodyColor, #ccc);
+    text-align: center;
+    word-break: break-word;
+    line-height: 1.3;
+    max-width: 100%;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.sp-card-sub {
+    font-size: 0.66rem;
+    color: var(--SmartThemeBodyColor, #999);
+    opacity: 0.55;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    margin-top: 1px;
+}
+
+.sp-card-actions {
+    display: flex;
+    gap: 5px;
+    opacity: 0;
+    transition: opacity 0.15s;
+    margin-top: 2px;
+}
+.sp-card:hover .sp-card-actions,
+.sp-card:focus-within .sp-card-actions {
+    opacity: 1;
+}
+
+.sp-card-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    border: 1px solid var(--SmartThemeBorderColor, rgba(255,255,255,0.12));
+    background: var(--SmartThemeBlurTintColor, rgba(30,30,46,0.85));
+    color: var(--SmartThemeBodyColor, #ccc);
+    cursor: pointer;
+    padding: 0;
+    transition: background 0.12s;
+}
+.sp-card-btn svg {
+    width: 13px;
+    height: 13px;
+    pointer-events: none;
+}
+.sp-card-btn:hover {
+    background: var(--SmartThemeBodyColor10, rgba(255,255,255,0.15));
+}
+.sp-card-select:hover {
+    color: #6ee7b7;
+}
+.sp-card-export:hover {
+    color: #93c5fd;
+}
+
+/* ── Toast ── */
+#sp-toast {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--SmartThemeBlurTintColor, #2a2a3e);
+    color: var(--SmartThemeBodyColor, #e0e0e0);
+    border: 1px solid var(--SmartThemeBorderColor, rgba(255,255,255,0.15));
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-size: 0.875rem;
+    z-index: 10010;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s, transform 0.2s;
+    white-space: nowrap;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+}
+#sp-toast.sp-toast-show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+#sp-toast.sp-toast-error {
+    border-color: rgba(248, 113, 113, 0.4);
+    color: #fca5a5;
+}
+
+/* ── 기본 페르소나 패널 숨김 ──────────────────────────────────
+   클릭 이벤트를 가로채서 막으려 하지 않고, 그냥 항상 숨겨버림.
+   덕분에 ST 내부 클릭 핸들러랑 경쟁할 필요가 없어짐. */
+#PersonaManagement {
+    display: none !important;
+}
