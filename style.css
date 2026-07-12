@@ -1,0 +1,534 @@
+/* ═══ Simple Persona — Persona Manager ══════════════════════════ */
+
+body.sp-active #PersonaManagement { display: none !important; }
+
+/* ── 오버레이 ── */
+#sp-overlay {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important; height: 100vh !important;
+    z-index: 2147483647 !important;
+    background: rgba(0,0,0,0.35) !important;
+    display: none;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* ── 모달 ── */
+#sp-modal {
+    position: relative !important;
+    width: 96vw !important;
+    max-width: 480px !important;
+    height: 92vh !important;
+    background: #ffffff !important;
+    color: #111 !important;
+    border-radius: 24px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.22), 0 4px 16px rgba(0,0,0,0.1) !important;
+}
+
+/* 다크 테마 지원 */
+@media (prefers-color-scheme: dark) {
+    #sp-modal { background: #1c1c1e !important; color: #f5f5f7 !important; }
+}
+
+/* ── 헤더 ── */
+#sp-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 22px 20px 16px;
+    flex-shrink: 0;
+}
+#sp-header-text { display: flex; flex-direction: column; gap: 3px; }
+#sp-title {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: inherit;
+    letter-spacing: -0.5px;
+}
+#sp-subtitle {
+    font-size: 0.75rem;
+    color: #8a8a8e;
+}
+#sp-close {
+    background: #f2f2f7;
+    border: none; cursor: pointer;
+    color: #6c6c70;
+    font-size: 0.9rem; font-weight: 600;
+    width: 30px; height: 30px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+    flex-shrink: 0; margin-top: 2px;
+}
+#sp-close:hover { background: #e5e5ea; }
+
+/* ── 액션 버튼 행 ── */
+#sp-action-bar {
+    display: flex;
+    gap: 8px;
+    padding: 0 20px 16px;
+    flex-shrink: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+#sp-action-bar::-webkit-scrollbar { display: none; }
+
+.sp-action-btn {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 5px; flex-shrink: 0;
+    min-width: 66px; padding: 11px 10px;
+    background: #f2f2f7;
+    border: none;
+    border-radius: 16px;
+    color: #3c3c43;
+    font-size: 0.68rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    font-family: inherit;
+}
+.sp-action-btn:hover { background: #e5e5ea; }
+.sp-action-btn:active { transform: scale(0.95); }
+.sp-action-btn svg { width: 22px; height: 22px; }
+
+/* ── 현재 페르소나 배너 ── */
+#sp-current {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 16px;
+    margin: 0 20px 14px;
+    background: #f9f9fb;
+    border: 1.5px solid #e5e5ea;
+    border-radius: 18px;
+    flex-shrink: 0;
+}
+#sp-current-avatar {
+    width: 52px; height: 52px; border-radius: 50%;
+    object-fit: cover; flex-shrink: 0;
+    border: 2px solid #e5e5ea;
+}
+#sp-current-info { flex: 1; min-width: 0; }
+#sp-current-name {
+    font-size: 1rem; font-weight: 700;
+    color: #111;
+    overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+}
+#sp-current-sub {
+    font-size: 0.72rem; color: #8a8a8e;
+    margin-top: 2px;
+    overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+}
+#sp-current-actions {
+    display: flex; gap: 7px; flex-shrink: 0;
+}
+.sp-cur-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 34px; height: 34px; border-radius: 50%;
+    background: #f2f2f7;
+    border: 1.5px solid #e5e5ea;
+    color: #6c6c70;
+    cursor: pointer; transition: background 0.15s;
+}
+.sp-cur-btn:hover { background: #e5e5ea; }
+.sp-cur-btn svg { width: 16px; height: 16px; }
+
+/* ── 검색 + 정렬 툴바 ── */
+#sp-toolbar {
+    display: flex; align-items: center; gap: 8px;
+    padding: 0 20px 12px;
+    flex-shrink: 0;
+}
+#sp-search-wrap { flex: 1; position: relative; }
+.sp-search-icon {
+    position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+    width: 14px; height: 14px; color: #aaa; pointer-events: none;
+}
+#sp-search {
+    width: 100%; padding: 9px 10px 9px 32px; box-sizing: border-box;
+    background: #f2f2f7;
+    border: none;
+    border-radius: 12px;
+    color: #111;
+    font-size: 0.84rem; outline: none; font-family: inherit;
+}
+#sp-search::placeholder { color: #aaa; }
+#sp-search:focus { background: #e9e9ef; }
+
+#sp-sort-wrap { position: relative; flex-shrink: 0; }
+#sp-sort {
+    appearance: none;
+    padding: 9px 28px 9px 10px; box-sizing: border-box;
+    background: #f2f2f7;
+    border: none;
+    border-radius: 12px;
+    color: #111;
+    font-size: 0.78rem; outline: none; font-family: inherit;
+    cursor: pointer;
+}
+.sp-sort-arrow {
+    position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+    width: 12px; height: 12px; pointer-events: none; color: #aaa;
+}
+.sp-toolbar-icon-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px; flex-shrink: 0;
+    background: #f2f2f7;
+    border: none;
+    border-radius: 12px;
+    color: #6c6c70; cursor: pointer;
+    transition: background 0.15s;
+}
+.sp-toolbar-icon-btn:hover { background: #e5e5ea; }
+.sp-toolbar-icon-btn svg { width: 15px; height: 15px; }
+
+/* ── 그리드 ── */
+#sp-grid {
+    flex: 1 1 auto !important; overflow-y: auto !important; padding: 4px 20px 16px !important;
+    display: grid !important; grid-template-columns: repeat(4, 1fr) !important;
+    grid-auto-rows: min-content !important;
+    gap: 12px !important; align-content: start !important; align-items: start !important;
+    -webkit-overflow-scrolling: touch;
+}
+#sp-grid::-webkit-scrollbar { width: 4px; }
+#sp-grid::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 4px; }
+
+/* ── 카드 ── */
+.sp-card {
+    display: flex !important; flex-direction: column !important; align-items: center !important;
+    padding: 0 0 8px !important; margin: 0 !important; border-radius: 18px !important; gap: 6px !important;
+    width: auto !important; height: auto !important; min-height: 0 !important;
+    background: #fff;
+    border: 1.5px solid #ebebef;
+    cursor: pointer;
+    transition: transform 0.12s, box-shadow 0.12s;
+    position: relative !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+}
+.sp-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.10); }
+.sp-card:active { transform: scale(0.96); }
+.sp-card.sp-card--active {
+    border-color: #636366;
+    box-shadow: 0 0 0 2.5px rgba(99,99,102,0.25);
+}
+
+.sp-card-img-wrap {
+    position: relative !important; width: 100% !important;
+    aspect-ratio: 1 / 1 !important;
+    height: auto !important; padding-top: 0 !important;
+    border-radius: 0 !important; overflow: hidden !important; flex-shrink: 0 !important;
+}
+.sp-card-img {
+    position: absolute !important; inset: 0 !important; width: 100% !important; height: 100% !important;
+    max-width: none !important; max-height: none !important;
+    border-radius: 0 !important;
+    object-fit: cover !important;
+    margin: 0 !important;
+}
+
+/* 별 즐겨찾기 */
+.sp-card-star {
+    position: absolute; top: 6px; left: 6px;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: rgba(255,255,255,0.88);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; z-index: 2;
+    border: none; padding: 0;
+    transition: background 0.15s;
+}
+.sp-card-star svg { width: 12px; height: 12px; }
+.sp-card-star:hover { background: rgba(255,255,255,1); }
+.sp-card-star.starred svg { fill: #f59e0b; stroke: #f59e0b; }
+
+/* 배지 (기본 페르소나) */
+.sp-card-badge {
+    position: absolute; top: 6px; right: 6px;
+    width: 20px; height: 20px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 2;
+}
+.sp-card-badge svg { width: 11px; height: 11px; stroke: #fff; }
+
+.sp-card-name {
+    display: block !important;
+    font-size: 0.74rem; font-weight: 700;
+    color: #111;
+    text-align: center; width: 100% !important;
+    overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+    padding: 0 6px; margin: 0 !important;
+}
+.sp-card-sub {
+    display: block !important;
+    font-size: 0.63rem; color: #8a8a8e;
+    text-align: center; width: 100% !important;
+    overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+    padding: 0 6px;
+    margin-top: -3px !important;
+}
+.sp-card-actions {
+    display: flex !important; gap: 5px !important; width: 100% !important;
+    justify-content: center !important; padding: 0 4px !important;
+    margin-top: 2px !important;
+}
+.sp-card-btn {
+    display: inline-flex !important; align-items: center !important; justify-content: center !important;
+    width: 28px !important; height: 28px !important; border-radius: 9px !important;
+    background: #f2f2f7;
+    border: none !important;
+    color: #6c6c70;
+    cursor: pointer; transition: background 0.12s;
+    margin: 0 !important; padding: 0 !important;
+}
+.sp-card-btn:hover { background: #e5e5ea; }
+.sp-card-btn svg { width: 13px; height: 13px; }
+.sp-card-btn.sp-card-delete:hover { color: #ef4444; background: #fff0f0; }
+
+/* ── 푸터 ── */
+#sp-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 20px;
+    border-top: 1px solid #f0f0f5;
+    flex-shrink: 0;
+}
+#sp-count { font-size: 0.78rem; color: #8a8a8e; }
+.sp-footer-icon-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 30px; height: 30px; border-radius: 8px;
+    background: transparent; border: none;
+    color: #8a8a8e; cursor: pointer;
+    transition: color 0.15s;
+}
+.sp-footer-icon-btn:hover { color: #3c3c43; }
+.sp-footer-icon-btn svg { width: 17px; height: 17px; }
+
+#sp-empty {
+    grid-column: 1/-1; text-align: center; padding: 60px 20px;
+    color: #aaa; font-size: 0.88rem;
+}
+
+/* ── 다이얼로그 ── */
+.sp-dialog {
+    position: absolute; inset: 0; z-index: 20;
+    background: #fff;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+    border-radius: 24px;
+}
+.sp-dialog-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid #f0f0f5;
+    flex-shrink: 0;
+}
+.sp-dialog-header h3 {
+    font-size: 1.05rem; font-weight: 700;
+    margin: 0; color: #111;
+}
+.sp-dialog-close-btn {
+    background: #f2f2f7;
+    border: none; cursor: pointer;
+    color: #6c6c70;
+    width: 30px; height: 30px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.9rem;
+}
+.sp-dialog-close-btn:hover { background: #e5e5ea; }
+.sp-dialog-body {
+    flex: 1; overflow-y: auto; padding: 20px;
+    display: flex; flex-direction: column; gap: 16px;
+}
+.sp-dialog-label { display: flex; flex-direction: column; gap: 6px; }
+.sp-dialog-label > span {
+    font-size: 0.78rem; color: #6c6c70; font-weight: 500;
+}
+.sp-dialog-input {
+    padding: 11px 13px; border-radius: 12px;
+    background: #f2f2f7;
+    border: none;
+    color: #111;
+    font-size: 0.875rem; outline: none; font-family: inherit;
+    box-sizing: border-box; width: 100%;
+    transition: background 0.15s;
+}
+.sp-dialog-input:focus { background: #e9e9ef; }
+.sp-dialog-textarea {
+    padding: 11px 13px; border-radius: 12px;
+    background: #f2f2f7;
+    border: none;
+    color: #111;
+    font-size: 0.82rem; outline: none; font-family: inherit;
+    min-height: 110px; resize: vertical; line-height: 1.55;
+    box-sizing: border-box; width: 100%;
+}
+.sp-dialog-textarea:focus { background: #e9e9ef; }
+.sp-dialog-avatar-preview {
+    width: 80px; height: 80px; border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #e5e5ea;
+    cursor: pointer; display: block;
+    transition: opacity 0.15s;
+}
+.sp-dialog-avatar-preview:hover { opacity: 0.8; }
+.sp-dialog-select {
+    padding: 11px 13px; border-radius: 12px;
+    background: #f2f2f7;
+    border: none;
+    color: #111;
+    font-size: 0.875rem; outline: none; font-family: inherit;
+    box-sizing: border-box; width: 100%; cursor: pointer;
+}
+.sp-dialog-footer {
+    display: flex; gap: 8px; padding: 14px 20px;
+    border-top: 1px solid #f0f0f5;
+    flex-shrink: 0;
+}
+.sp-btn-primary {
+    flex: 1; padding: 12px;
+    background: #111;
+    border: none; border-radius: 14px;
+    color: #fff; font-size: 0.875rem; font-weight: 700;
+    cursor: pointer; transition: opacity 0.15s;
+    font-family: inherit;
+}
+.sp-btn-primary:hover { opacity: 0.8; }
+.sp-btn-secondary {
+    flex: 1; padding: 12px;
+    background: #f2f2f7;
+    border: none;
+    border-radius: 14px;
+    color: #3c3c43;
+    font-size: 0.875rem; cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s;
+    display: flex; align-items: center; gap: 6px;
+}
+.sp-btn-secondary:hover { background: #e5e5ea; }
+.sp-btn-secondary svg { width: 16px; height: 16px; flex-shrink: 0; }
+.sp-btn-danger {
+    flex: 1; padding: 12px;
+    background: #ef4444;
+    border: none; border-radius: 14px;
+    color: #fff; font-size: 0.875rem; font-weight: 700;
+    cursor: pointer; transition: opacity 0.15s;
+    font-family: inherit;
+}
+.sp-btn-danger:hover { opacity: 0.85; }
+
+/* ── 내보내기 포맷 선택 시트 ── */
+.sp-export-sheet {
+    position: absolute; inset: 0; z-index: 25;
+    background: rgba(0,0,0,0.55);
+    display: flex; align-items: flex-end;
+    border-radius: 24px;
+}
+.sp-export-sheet-inner {
+    width: 100%;
+    background: #fff;
+    border-radius: 24px 24px 0 0;
+    padding: 10px 16px 28px;
+    display: flex; flex-direction: column; gap: 8px;
+}
+.sp-export-sheet-title {
+    font-size: 0.7rem; font-weight: 600; color: #8a8a8e;
+    text-align: center; padding: 8px 0 2px;
+    text-transform: uppercase; letter-spacing: 0.06em;
+}
+.sp-export-opt-btn {
+    width: 100%; padding: 15px 16px;
+    background: #f2f2f7;
+    border: none; border-radius: 14px;
+    font-size: 0.9rem; font-weight: 600; color: #111;
+    cursor: pointer; font-family: inherit;
+    transition: background 0.15s;
+    text-align: left;
+    display: flex; align-items: center; gap: 10px;
+}
+.sp-export-opt-btn:hover { background: #e5e5ea; }
+.sp-export-opt-btn:active { background: #d8d8de; }
+.sp-export-cancel-btn {
+    width: 100%; padding: 15px;
+    background: #f2f2f7;
+    border: none; border-radius: 14px;
+    font-size: 0.92rem; font-weight: 700; color: #ef4444;
+    cursor: pointer; font-family: inherit;
+    transition: background 0.15s;
+    margin-top: 2px; text-align: center;
+}
+.sp-export-cancel-btn:hover { background: rgba(239,68,68,0.08); }
+
+/* ── 숨겨진 파일 입력 ── */
+#sp-import-file, #sp-new-avatar-file, #sp-edit-avatar-file { display: none; }
+
+/* ── 토스트 ── */
+#sp-toast {
+    position: fixed; bottom: 36px; left: 50%;
+    transform: translateX(-50%) translateY(16px);
+    background: rgba(50,50,55,0.95);
+    color: #fff;
+    border-radius: 14px; padding: 10px 22px;
+    font-size: 0.875rem;
+    z-index: 2147483647; opacity: 0; pointer-events: none;
+    transition: opacity 0.22s, transform 0.22s;
+    white-space: nowrap; max-width: 90vw;
+}
+#sp-toast.sp-toast-show { opacity: 1; transform: translateX(-50%) translateY(0); }
+#sp-toast.sp-toast-error { background: rgba(185,28,28,0.95); }
+
+/* ── 확장 탭 설정 ── */
+#sp-settings-block .sp-drawer-toggle {
+    display: flex; align-items: center; justify-content: space-between;
+    cursor: pointer; padding: 6px 0; user-select: none;
+}
+
+/* ── 확인 다이얼로그 ── */
+.sp-confirm-dialog {
+    position: absolute; inset: 0; z-index: 30;
+    background: rgba(0,0,0,0.4);
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 24px;
+}
+.sp-confirm-box {
+    background: #fff;
+    border-radius: 18px; padding: 24px 22px 20px;
+    max-width: 280px; width: 90%;
+}
+.sp-confirm-box h4 { margin: 0 0 10px; font-size: 0.95rem; font-weight: 700; color: #111; }
+.sp-confirm-box p { margin: 0 0 18px; font-size: 0.82rem; color: #6c6c70; line-height: 1.5; }
+.sp-confirm-box .sp-confirm-btns { display: flex; gap: 8px; }
+
+/* ── 다크 테마 지원 (ST 변수 기반) ── */
+#sp-modal,
+.sp-dialog,
+.sp-export-sheet-inner,
+.sp-confirm-box {
+    background: var(--SmartThemeBlurTintColor, #fff) !important;
+    color: var(--SmartThemeBodyColor, #111) !important;
+}#sp-title, #sp-current-name, .sp-dialog-header h3, .sp-confirm-box h4,
+.sp-card-name { color: var(--SmartThemeBodyColor, #111) !important; }
+#sp-subtitle, #sp-current-sub, #sp-count, .sp-dialog-label > span,
+.sp-card-sub, .sp-confirm-box p { color: var(--SmartThemeQuoteColor, #8a8a8e) !important; }
+#sp-close, .sp-dialog-close-btn { background: color-mix(in srgb, var(--SmartThemeBodyColor,#000) 8%, transparent) !important; color: var(--SmartThemeBodyColor,#555) !important; }
+#sp-close:hover, .sp-dialog-close-btn:hover { background: color-mix(in srgb, var(--SmartThemeBodyColor,#000) 14%, transparent) !important; }
+.sp-action-btn, #sp-sort, #sp-search, .sp-toolbar-icon-btn,
+.sp-cur-btn, .sp-card-btn, .sp-dialog-input, .sp-dialog-textarea,
+.sp-dialog-select, .sp-btn-secondary, .sp-card,
+.sp-export-opt-btn, .sp-export-cancel-btn {
+    background: color-mix(in srgb, var(--SmartThemeBodyColor,#000) 6%, transparent) !important;
+    color: var(--SmartThemeBodyColor, #333) !important;
+    border-color: var(--SmartThemeBorderColor, rgba(0,0,0,0.1)) !important;
+}
+.sp-action-btn:hover, .sp-toolbar-icon-btn:hover, .sp-cur-btn:hover,
+.sp-card-btn:hover, .sp-btn-secondary:hover,
+.sp-export-opt-btn:hover { background: color-mix(in srgb, var(--SmartThemeBodyColor,#000) 12%, transparent) !important; }
+.sp-export-cancel-btn { color: #ef4444 !important; background: color-mix(in srgb, var(--SmartThemeBodyColor,#000) 4%, transparent) !important; }
+#sp-current { background: color-mix(in srgb, var(--SmartThemeBodyColor,#000) 4%, transparent) !important; border-color: var(--SmartThemeBorderColor, rgba(0,0,0,0.08)) !important; }
+#sp-current-avatar { border-color: var(--SmartThemeBorderColor, rgba(0,0,0,0.12)) !important; }
+#sp-footer, .sp-dialog-header, .sp-dialog-footer { border-color: var(--SmartThemeBorderColor, rgba(0,0,0,0.08)) !important; }
+.sp-btn-primary { background: var(--SmartThemeBodyColor, #111) !important; color: var(--SmartThemeBlurTintColor, #fff) !important; }
+.sp-card { background: color-mix(in srgb, var(--SmartThemeBodyColor,#000) 3%, transparent) !important; border-color: var(--SmartThemeBorderColor, rgba(0,0,0,0.08)) !important; }
+.sp-card-btn.sp-card-delete:hover { color: #ef4444 !important; background: rgba(239,68,68,0.1) !important; }
+.sp-export-cancel-btn { color: #ef4444 !important; }
