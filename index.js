@@ -30,6 +30,10 @@ const MODULE_NAME = 'simple-persona';
             ?? document.querySelector(`#user_avatar_block [data-avatar-id="${CSS.escape(f)}"] .ch_additional_info`)?.textContent?.trim()
             ?? '';
     }
+    // 카드에 표시되는 짧은 메모 — ST의 "Persona Title" 필드 (프롬프트에는 포함되지 않는, 순수 표시용 텍스트)
+    function getPersonaTitle(f) {
+        return power_user.persona_descriptions?.[f]?.title ?? '';
+    }
     function getDefaultPersona() { return power_user.default_persona ?? null; }
     function getPersonaGroups() { return getSettings().groups ?? {}; }
     function getFavorites() { return getSettings().favorites ?? {}; }
@@ -50,13 +54,13 @@ const MODULE_NAME = 'simple-persona';
     async function listPersonas() {
         try {
             return (await getUserAvatars(false)).map(f => ({
-                file: f, name: getPersonaName(f), memo: getPersonaMemo(f),
+                file: f, name: getPersonaName(f), memo: getPersonaTitle(f),
             }));
         } catch {
             const r = [];
             document.querySelectorAll('#user_avatar_block .avatar-container').forEach(el => {
                 const f = el.dataset.avatarId ?? el.getAttribute('data-avatar-id') ?? '';
-                if (f) r.push({ file: f, name: el.querySelector('.ch_name')?.textContent?.trim() ?? f, memo: el.querySelector('.ch_additional_info')?.textContent?.trim() ?? '' });
+                if (f) r.push({ file: f, name: el.querySelector('.ch_name')?.textContent?.trim() ?? f, memo: getPersonaTitle(f) });
             });
             return r;
         }
@@ -114,8 +118,7 @@ const MODULE_NAME = 'simple-persona';
             <!-- 헤더 -->
             <div id="sp-header">
                 <div id="sp-header-text">
-                    <span id="sp-title">Persona Manager</span>
-                    <span id="sp-subtitle">Browse, organize and edit your personas.</span>
+                    <span id="sp-title">페르소나</span>
                 </div>
                 <button id="sp-close">✕</button>
             </div>
@@ -249,7 +252,7 @@ const MODULE_NAME = 'simple-persona';
         const subEl = document.getElementById('sp-current-sub');
         if (imgEl) imgEl.src = getAvatarUrl(f);
         if (nameEl) nameEl.textContent = f ? getPersonaName(f) : '선택 없음';
-        if (subEl) subEl.textContent = f ? (getPersonaMemo(f) || '페르소나') : '현재 선택된 페르소나';
+        if (subEl) subEl.textContent = f ? (getPersonaTitle(f) || '페르소나') : '현재 선택된 페르소나';
 
         // 기본 페르소나 버튼 하이라이트
         const defBtn = document.getElementById('sp-cur-default');
@@ -284,6 +287,10 @@ const MODULE_NAME = 'simple-persona';
                 <div class="sp-dialog-label">
                     <span>이름 *</span>
                     <input id="sp-new-name" type="text" class="sp-dialog-input" placeholder="페르소나 이름" />
+                </div>
+                <div class="sp-dialog-label">
+                    <span>메모 (목록에 짧게 표시됨, 선택)</span>
+                    <input id="sp-new-title" type="text" class="sp-dialog-input" placeholder="예: 학교 배경, 현대물..." />
                 </div>
                 <div class="sp-dialog-label">
                     <span>설명 / 시스템 프롬프트 (선택)</span>
@@ -322,6 +329,7 @@ const MODULE_NAME = 'simple-persona';
         dlg.querySelectorAll('.sp-dlg-close').forEach(b => b.addEventListener('click', closeDialog));
         dlg.querySelector('#sp-new-confirm').addEventListener('click', async () => {
             const name = dlg.querySelector('#sp-new-name').value.trim();
+            const titleVal = dlg.querySelector('#sp-new-title').value.trim();
             const desc = dlg.querySelector('#sp-new-desc').value.trim();
             const pos = parseInt(dlg.querySelector('#sp-new-pos').value);
             if (!name) { showToast('이름을 입력해주세요.', true); return; }
@@ -329,25 +337,37 @@ const MODULE_NAME = 'simple-persona';
 
             const nativeInput = document.querySelector('#form_upload_avatar input[type="file"]');
             if (!nativeInput) { showToast('업로드 폼을 찾을 수 없습니다.', true); return; }
+
+            // 업로드 전 목록을 저장해두고, 업로드 후 새로 생긴 파일명을 찾는다.
+            // (ST가 서버에 저장하며 파일명을 다시 붙이기 때문에 selectedFile.name을 그대로 쓰면 안 됨)
+            const beforeFiles = new Set((await listPersonas()).map(p => p.file));
             const dt = new DataTransfer();
             dt.items.add(selectedFile);
             nativeInput.files = dt.files;
             nativeInput.dispatchEvent(new Event('change', { bubbles: true }));
             showToast('업로드 중...');
 
-            setTimeout(() => {
-                const fileName = selectedFile.name;
-                if (!power_user.personas) power_user.personas = {};
-                power_user.personas[fileName] = name;
-                if (desc) {
-                    if (!power_user.persona_descriptions) power_user.persona_descriptions = {};
-                    power_user.persona_descriptions[fileName] = { description: desc, position: pos };
-                }
-                saveSettingsDebounced();
-                closeDialog();
+            let newFile = null;
+            for (let i = 0; i < 25; i++) {
+                await new Promise(r => setTimeout(r, 300));
+                const after = await listPersonas();
+                const found = after.find(p => !beforeFiles.has(p.file));
+                if (found) { newFile = found.file; break; }
+            }
+            if (!newFile) {
+                showToast('업로드 확인에 실패했습니다. 잠시 후 목록을 새로고침 해주세요.', true);
                 renderGrid(document.getElementById('sp-search')?.value ?? '');
-                showToast(`"${name}" 페르소나 생성 완료!`);
-            }, 1200);
+                return;
+            }
+
+            if (!power_user.personas) power_user.personas = {};
+            power_user.personas[newFile] = name;
+            if (!power_user.persona_descriptions) power_user.persona_descriptions = {};
+            power_user.persona_descriptions[newFile] = { description: desc, position: pos, title: titleVal };
+            saveSettingsDebounced();
+            closeDialog();
+            renderGrid(document.getElementById('sp-search')?.value ?? '');
+            showToast(`"${name}" 페르소나 생성 완료!`);
         });
     }
 
