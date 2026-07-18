@@ -108,6 +108,9 @@ function observeBlock() {
 }
 
 async function addSettingsPanel() {
+    // Never add the panel twice.
+    if (document.getElementById('sp-enabled')) return;
+
     const settings = getSettings();
     const html = `
     <div class="simple-persona-settings">
@@ -153,6 +156,11 @@ async function addSettingsPanel() {
 }
 
 export async function init() {
+    // Guard against double-init: the manifest `activate` hook and the
+    // jQuery bootstrap below can both fire depending on ST version.
+    if (window.__simplePersonaInit) return;
+    window.__simplePersonaInit = true;
+
     getSettings();
     await addSettingsPanel();
 
@@ -171,10 +179,8 @@ export async function init() {
 }
 
 // Some ST versions call the manifest hook, some just import the module.
+// init() is self-guarding, so calling it from both paths is safe.
 jQuery(async () => {
-    // Guard against double-init if both paths fire.
-    if (window.__simplePersonaInit) return;
-    window.__simplePersonaInit = true;
     try {
         await init();
     } catch (e) {
