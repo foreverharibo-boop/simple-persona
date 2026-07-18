@@ -394,19 +394,19 @@
 }
 
 /* ---- MAGAZINE: photo fills card, text overlaid at bottom -- */
+/* Avatar is IN FLOW and carries the aspect-ratio so the container
+   height is content-driven — putting aspect-ratio on the grid item
+   itself collapses 1fr columns, so we avoid that. */
 #user_avatar_block.sp-enabled.sp-theme-magazine .avatar-container {
     padding: 0;
-    aspect-ratio: 3 / 4;
     height: auto;
     overflow: hidden;
-    justify-content: flex-end;
+    justify-content: flex-start;
 }
 #user_avatar_block.sp-enabled.sp-theme-magazine .avatar-container .avatar {
-    position: absolute;
-    inset: 0;
     width: 100% !important;
-    height: 100% !important;
-    aspect-ratio: auto;
+    height: auto !important;
+    aspect-ratio: 3 / 4;
     border-radius: 0 !important;
     margin: 0;
 }
@@ -414,7 +414,10 @@
     border-radius: 0 !important;
 }
 #user_avatar_block.sp-enabled.sp-theme-magazine .character_select_container {
-    position: relative;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
     z-index: 1;
     width: 100%;
     padding: 24px 10px 9px;
@@ -437,8 +440,9 @@
 }
 
 /* ---- TRADING CARD: gradient frame + banner --------------- */
+/* Height is content-driven (square avatar + banner). No container
+   aspect-ratio, which would collapse the 1fr columns. */
 #user_avatar_block.sp-enabled.sp-theme-tcg .avatar-container {
-    aspect-ratio: 3 / 4.2;
     height: auto;
     padding: 6px;
     gap: 5px;
@@ -454,13 +458,15 @@
 #user_avatar_block.sp-enabled.sp-theme-tcg .character_select_container {
     width: 100%;
     box-sizing: border-box;
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(0, 0, 0, 0.18);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
     border-radius: 6px;
     padding: 4px 6px;
 }
 #user_avatar_block.sp-enabled.sp-theme-tcg .ch_name,
 #user_avatar_block.sp-enabled.sp-theme-tcg .ch_additional_info {
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
 }
 
 /* ---- GLASS: frosted translucent cards -------------------- */
