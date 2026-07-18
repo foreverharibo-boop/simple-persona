@@ -427,7 +427,7 @@
     width: 100%;
     padding: 24px 10px 9px;
     box-sizing: border-box;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.85), transparent);
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.5), transparent 85%);
     text-align: left !important;
     align-items: flex-start !important;
 }
@@ -437,11 +437,12 @@
 }
 #user_avatar_block.sp-enabled.sp-theme-magazine .ch_name,
 #user_avatar_block.sp-enabled.sp-theme-magazine .ch_additional_info {
+    color: #ffffff !important;
     text-align: left !important;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
 }
 #user_avatar_block.sp-enabled.sp-theme-magazine .ch_additional_info {
-    opacity: 0.85;
+    opacity: 0.9;
 }
 
 /* ---- TRADING CARD: gradient frame + banner --------------- */
