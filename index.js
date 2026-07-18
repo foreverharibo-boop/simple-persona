@@ -2,7 +2,7 @@ import { extension_settings } from '../../../extensions.js';
 import { saveSettingsDebounced } from '../../../../script.js';
 
 const MODULE = 'simplePersona';
-const THEMES = ['soft', 'neon', 'paper'];
+const THEMES = ['soft', 'paper', 'polaroid', 'circle', 'magazine', 'sticker', 'tcg', 'glass'];
 
 const defaultSettings = {
     enabled: true,
@@ -10,6 +10,8 @@ const defaultSettings = {
     theme: 'soft',
     useCustomAccent: false,
     accentColor: '#c8a0e6',
+    useCustomCardColor: false,
+    cardColor: '#8a8aa0',
 };
 
 function getSettings() {
@@ -36,6 +38,17 @@ function applyThemeToEl(el) {
         el.style.setProperty('--sp-accent', settings.accentColor);
     } else {
         el.style.removeProperty('--sp-accent');
+    }
+    // Normal (unselected) card color — a visible-but-soft tint of the
+    // chosen color, overriding the theme's default card background.
+    if (settings.useCustomCardColor && settings.cardColor) {
+        el.style.setProperty('--sp-card-bg',
+            `color-mix(in srgb, ${settings.cardColor} 20%, transparent)`);
+        el.style.setProperty('--sp-card-bg-hover',
+            `color-mix(in srgb, ${settings.cardColor} 32%, transparent)`);
+    } else {
+        el.style.removeProperty('--sp-card-bg');
+        el.style.removeProperty('--sp-card-bg-hover');
     }
 }
 
@@ -160,18 +173,32 @@ async function addSettingsPanel() {
                     <label for="sp-theme"><small>Theme preset</small></label>
                     <select id="sp-theme" class="text_pole">
                         <option value="soft">Soft (default)</option>
-                        <option value="neon">Neon</option>
                         <option value="paper">Paper</option>
+                        <option value="polaroid">Polaroid</option>
+                        <option value="circle">Circle</option>
+                        <option value="magazine">Magazine</option>
+                        <option value="sticker">Sticker</option>
+                        <option value="tcg">Trading Card</option>
+                        <option value="glass">Glass</option>
                     </select>
                 </div>
 
                 <label class="checkbox_label" for="sp-use-accent" style="margin-top:8px;">
                     <input id="sp-use-accent" type="checkbox">
-                    <span>Use custom accent color</span>
+                    <span>Custom selected-card color</span>
                 </label>
                 <div class="flex-container alignItemsCenter" id="sp-accent-row" style="gap:8px;">
                     <input id="sp-accent-color" type="color" style="width:42px;height:28px;padding:0;border:none;background:none;cursor:pointer;">
-                    <small class="text_muted">Accent (glow, active border &amp; dot)</small>
+                    <small class="text_muted">Selected card (glow, border &amp; dot)</small>
+                </div>
+
+                <label class="checkbox_label" for="sp-use-card" style="margin-top:8px;">
+                    <input id="sp-use-card" type="checkbox">
+                    <span>Custom normal-card color</span>
+                </label>
+                <div class="flex-container alignItemsCenter" id="sp-card-row" style="gap:8px;">
+                    <input id="sp-card-color" type="color" style="width:42px;height:28px;padding:0;border:none;background:none;cursor:pointer;">
+                    <small class="text_muted">All unselected cards</small>
                 </div>
 
                 <small class="text_muted" style="display:block;margin-top:8px;">
@@ -189,6 +216,8 @@ async function addSettingsPanel() {
     const $theme = $('#sp-theme');
     const $useAccent = $('#sp-use-accent');
     const $accent = $('#sp-accent-color');
+    const $useCard = $('#sp-use-card');
+    const $card = $('#sp-card-color');
 
     $enabled.prop('checked', settings.enabled);
     $bar.prop('checked', settings.showCurrentBar);
@@ -196,6 +225,9 @@ async function addSettingsPanel() {
     $useAccent.prop('checked', settings.useCustomAccent);
     $accent.val(settings.accentColor);
     $accent.prop('disabled', !settings.useCustomAccent);
+    $useCard.prop('checked', settings.useCustomCardColor);
+    $card.val(settings.cardColor);
+    $card.prop('disabled', !settings.useCustomCardColor);
 
     $enabled.on('change', function () {
         settings.enabled = $(this).prop('checked');
@@ -220,6 +252,17 @@ async function addSettingsPanel() {
     });
     $accent.on('input', function () {
         settings.accentColor = $(this).val();
+        saveSettingsDebounced();
+        applyTheme();
+    });
+    $useCard.on('change', function () {
+        settings.useCustomCardColor = $(this).prop('checked');
+        $card.prop('disabled', !settings.useCustomCardColor);
+        saveSettingsDebounced();
+        applyTheme();
+    });
+    $card.on('input', function () {
+        settings.cardColor = $(this).val();
         saveSettingsDebounced();
         applyTheme();
     });
