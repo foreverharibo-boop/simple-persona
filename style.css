@@ -141,14 +141,19 @@
 }
 
 /* ---- Each persona card ----------------------------------- */
+/* width/max-width use !important to defeat ST's native grid-view
+   toggle (#user_avatar_block.gridView .avatar-container sets
+   max-width:100px at equal specificity), so our grid fills whether
+   or not the user has that toggle on. */
 #user_avatar_block.sp-enabled .avatar-container {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: center !important;
     gap: 8px;
     padding: 14px 6px 12px;
     margin: 0;
-    width: 100%;
+    width: 100% !important;
+    max-width: none !important;
     height: 100%;
     justify-content: flex-start;
     box-sizing: border-box;
