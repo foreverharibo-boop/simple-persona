@@ -2,10 +2,14 @@ import { extension_settings } from '../../../extensions.js';
 import { saveSettingsDebounced } from '../../../../script.js';
 
 const MODULE = 'simplePersona';
+const THEMES = ['soft', 'neon', 'paper'];
 
 const defaultSettings = {
     enabled: true,
     showCurrentBar: true,
+    theme: 'soft',
+    useCustomAccent: false,
+    accentColor: '#c8a0e6',
 };
 
 function getSettings() {
@@ -21,6 +25,26 @@ function getSettings() {
     return extension_settings[MODULE];
 }
 
+/** Apply the current theme preset + accent color to one element. */
+function applyThemeToEl(el) {
+    if (!el) return;
+    const settings = getSettings();
+    for (const t of THEMES) {
+        el.classList.toggle('sp-theme-' + t, settings.theme === t);
+    }
+    if (settings.useCustomAccent && settings.accentColor) {
+        el.style.setProperty('--sp-accent', settings.accentColor);
+    } else {
+        el.style.removeProperty('--sp-accent');
+    }
+}
+
+/** Apply theme to both the grid block and the current-persona bar. */
+function applyTheme() {
+    applyThemeToEl(document.getElementById('user_avatar_block'));
+    applyThemeToEl(document.getElementById('sp-current-bar'));
+}
+
 /** Toggle the reskin class on the persona block. */
 function applyEnabledState() {
     const settings = getSettings();
@@ -31,6 +55,7 @@ function applyEnabledState() {
         removeCurrentBar();
     } else {
         syncCurrentBar();
+        applyTheme();
     }
 }
 
@@ -72,13 +97,14 @@ function syncCurrentBar() {
                 <div class="sp-current-name"></div>
             </div>
         `;
-        // Clicking the bar scrolls to and flashes the active card.
+        // Clicking the bar scrolls to the active card.
         bar.addEventListener('click', () => {
             const active = block.querySelector('.avatar-container.selected');
             active?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         });
         // Insert directly before the persona list block.
         block.parentElement?.insertBefore(bar, block);
+        applyThemeToEl(bar);
     }
 
     const barImg = bar.querySelector('.sp-current-avatar');
@@ -93,9 +119,10 @@ function observeBlock() {
     if (!block) return;
 
     const observer = new MutationObserver(() => {
-        // Re-apply class in case ST rebuilt the block, then resync bar.
+        // Re-apply classes in case ST rebuilt the block, then resync.
         const settings = getSettings();
         block.classList.toggle('sp-enabled', !!settings.enabled);
+        applyTheme();
         syncCurrentBar();
     });
 
@@ -128,7 +155,26 @@ async function addSettingsPanel() {
                     <input id="sp-show-current-bar" type="checkbox">
                     <span>Show "current persona" bar on top</span>
                 </label>
-                <small class="text_muted">
+
+                <div class="flex-container flexFlowColumn" style="margin-top:8px;">
+                    <label for="sp-theme"><small>Theme preset</small></label>
+                    <select id="sp-theme" class="text_pole">
+                        <option value="soft">Soft (default)</option>
+                        <option value="neon">Neon</option>
+                        <option value="paper">Paper</option>
+                    </select>
+                </div>
+
+                <label class="checkbox_label" for="sp-use-accent" style="margin-top:8px;">
+                    <input id="sp-use-accent" type="checkbox">
+                    <span>Use custom accent color</span>
+                </label>
+                <div class="flex-container alignItemsCenter" id="sp-accent-row" style="gap:8px;">
+                    <input id="sp-accent-color" type="color" style="width:42px;height:28px;padding:0;border:none;background:none;cursor:pointer;">
+                    <small class="text_muted">Accent (glow, active border &amp; dot)</small>
+                </div>
+
+                <small class="text_muted" style="display:block;margin-top:8px;">
                     Restyles the native Persona Management panel into a card
                     grid. All original features keep working.
                 </small>
@@ -140,8 +186,16 @@ async function addSettingsPanel() {
 
     const $enabled = $('#sp-enabled');
     const $bar = $('#sp-show-current-bar');
+    const $theme = $('#sp-theme');
+    const $useAccent = $('#sp-use-accent');
+    const $accent = $('#sp-accent-color');
+
     $enabled.prop('checked', settings.enabled);
     $bar.prop('checked', settings.showCurrentBar);
+    $theme.val(settings.theme);
+    $useAccent.prop('checked', settings.useCustomAccent);
+    $accent.val(settings.accentColor);
+    $accent.prop('disabled', !settings.useCustomAccent);
 
     $enabled.on('change', function () {
         settings.enabled = $(this).prop('checked');
@@ -152,6 +206,22 @@ async function addSettingsPanel() {
         settings.showCurrentBar = $(this).prop('checked');
         saveSettingsDebounced();
         syncCurrentBar();
+    });
+    $theme.on('change', function () {
+        settings.theme = $(this).val();
+        saveSettingsDebounced();
+        applyTheme();
+    });
+    $useAccent.on('change', function () {
+        settings.useCustomAccent = $(this).prop('checked');
+        $accent.prop('disabled', !settings.useCustomAccent);
+        saveSettingsDebounced();
+        applyTheme();
+    });
+    $accent.on('input', function () {
+        settings.accentColor = $(this).val();
+        saveSettingsDebounced();
+        applyTheme();
     });
 }
 
@@ -173,6 +243,7 @@ export async function init() {
         // Give ST a tick to render the list, then style it.
         setTimeout(() => {
             applyEnabledState();
+            applyTheme();
             syncCurrentBar();
         }, 50);
     });
