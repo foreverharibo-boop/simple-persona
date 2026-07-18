@@ -19,7 +19,7 @@
 /* ---- The grid container ---------------------------------- */
 #user_avatar_block.sp-enabled {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: var(--sp-gap);
     padding: 4px 2px;
     align-content: start;
@@ -76,24 +76,28 @@
     position: relative;
 }
 
-/* ---- The avatar image (rounded-square) ------------------- */
-/* ST forces `border-radius !important` when the user's avatar
-   style is Square/Round, so we must match that with a higher-
-   specificity !important. We deliberately do NOT set width/height
-   here — that lets the user's own big-avatars size stand. */
-#user_avatar_block.sp-enabled .avatar-container .avatar,
-#user_avatar_block.sp-enabled .avatar-container .avatar img {
+/* ---- The avatar image (large, rounded-square) ------------ */
+/* ST forces size AND `border-radius !important` via big-avatars /
+   square-avatars body classes, so we override both with a higher-
+   specificity !important. Size scales with the card but caps out,
+   so 4 columns still look generous. */
+#user_avatar_block.sp-enabled .avatar-container .avatar {
+    width: min(84%, 130px) !important;
+    height: auto !important;
+    aspect-ratio: 1 / 1;
     border-radius: 16px !important;
     overflow: hidden;
-}
-
-#user_avatar_block.sp-enabled .avatar-container .avatar {
     align-self: center;
+    margin: 0 auto;
     outline: none;
+    flex: unset;
 }
 
 #user_avatar_block.sp-enabled .avatar-container .avatar img {
+    width: 100% !important;
+    height: 100% !important;
     object-fit: cover;
+    border-radius: 16px !important;
 }
 
 /* Default persona keeps its golden marker, adapted to square */
@@ -102,46 +106,61 @@
     outline-offset: 2px;
 }
 
-/* ---- Name + description ---------------------------------- */
+/* ---- Name + description (memo) --------------------------- */
 #user_avatar_block.sp-enabled .character_select_container {
     width: 100%;
-    text-align: center;
-    align-items: center;
+    text-align: center !important;
+    align-items: center !important;
+    justify-content: center;
+    flex-direction: column;
 }
 
 #user_avatar_block.sp-enabled .character_name_block {
-    justify-content: center;
+    width: 100%;
+    justify-content: center !important;
+    align-items: center !important;
     flex-direction: column;
     gap: 0;
+    text-align: center !important;
 }
 
 #user_avatar_block.sp-enabled .ch_name {
     font-weight: 600;
     font-size: 14px;
-    text-align: center;
-    max-width: 100%;
+    width: 100%;
+    text-align: center !important;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
+/* Persona memo — show it, centered, up to 2 lines. */
 #user_avatar_block.sp-enabled .ch_description {
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
     font-size: 11px;
-    opacity: 0.7;
-    text-align: center;
-    max-width: 100%;
+    opacity: 0.65;
+    width: 100%;
+    text-align: center !important;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
+    white-space: normal;
     /* undo the native 3-row min-height hack */
     min-height: 0;
-    max-height: 1.4em;
+    max-height: 2.8em;
     line-height: 1.4em;
-    margin-top: 2px;
+    margin-top: 3px;
 }
 
 #user_avatar_block.sp-enabled .ch_additional_info {
     display: none;
+}
+
+/* Personas with no memo get `.text_muted` + "[No description]";
+   hide those so only real memos show. */
+#user_avatar_block.sp-enabled .ch_description.text_muted {
+    display: none !important;
 }
 
 /* Lock badges: keep but shrink and float them */
