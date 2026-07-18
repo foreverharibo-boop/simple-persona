@@ -20,6 +20,7 @@
 #user_avatar_block.sp-enabled {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-auto-rows: 1fr;
     gap: var(--sp-gap);
     padding: 4px 2px;
     align-content: start;
@@ -32,9 +33,11 @@
     flex-direction: column;
     align-items: center;
     gap: 8px;
-    padding: 16px 10px 12px;
+    padding: 14px 6px 12px;
     margin: 0;
     width: 100%;
+    height: 100%;
+    justify-content: flex-start;
     box-sizing: border-box;
     border-radius: var(--sp-radius);
     background: var(--sp-card-bg);
@@ -82,7 +85,7 @@
    specificity !important. Size scales with the card but caps out,
    so 4 columns still look generous. */
 #user_avatar_block.sp-enabled .avatar-container .avatar {
-    width: min(94%, 220px) !important;
+    width: min(96%, 280px) !important;
     height: auto !important;
     aspect-ratio: 1 / 1;
     border-radius: 16px !important;
@@ -140,20 +143,17 @@
 }
 
 /* Persona TITLE (the short "display only" memo) — show it,
-   centered, up to 2 lines. */
+   centered, truncated to one line so cards stay uniform height. */
 #user_avatar_block.sp-enabled .ch_additional_info {
-    display: -webkit-box !important;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
+    display: block !important;
     font-size: 11px;
     opacity: 0.65;
     width: 100%;
     text-align: center !important;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: normal;
+    white-space: nowrap;
     line-height: 1.4em;
-    max-height: 2.8em;
     margin-top: 3px;
 }
 
