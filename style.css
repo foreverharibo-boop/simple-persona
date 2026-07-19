@@ -427,7 +427,7 @@
     width: 100%;
     padding: 24px 10px 9px;
     box-sizing: border-box;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.5), transparent 85%);
+    background: transparent;
     text-align: left !important;
     align-items: flex-start !important;
 }
