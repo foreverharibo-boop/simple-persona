@@ -1,12 +1,12 @@
 import { extension_settings } from '../../../extensions.js';
 import { saveSettingsDebounced } from '../../../../script.js';
 
-const MODULE = 'simpleCharacter';
+const MODULE = 'simplePersona';
 const THEMES = ['soft', 'paper', 'polaroid', 'circle', 'magazine', 'sticker', 'tcg', 'glass', 'bubble-pink', 'bubble-sky', 'heart-pink', 'heart-sky', 'bare-white', 'bare-black'];
-const BLOCK_ID = 'rm_print_characters_block';
 
 const defaultSettings = {
     enabled: true,
+    showCurrentBar: true,
     theme: 'soft',
     useCustomAccent: false,
     accentColor: '#c8a0e6',
@@ -18,6 +18,7 @@ function getSettings() {
     if (!extension_settings[MODULE]) {
         extension_settings[MODULE] = structuredClone(defaultSettings);
     }
+    // fill any missing keys after an update
     for (const key of Object.keys(defaultSettings)) {
         if (extension_settings[MODULE][key] === undefined) {
             extension_settings[MODULE][key] = defaultSettings[key];
@@ -26,125 +27,151 @@ function getSettings() {
     return extension_settings[MODULE];
 }
 
-/** Apply theme preset + custom colors to the character block. */
-function applyTheme() {
+/** Apply the current theme preset + accent color to one element. */
+function applyThemeToEl(el) {
+    if (!el) return;
     const settings = getSettings();
-    const block = document.getElementById(BLOCK_ID);
-    if (!block) return;
     for (const t of THEMES) {
-        block.classList.toggle('sc-theme-' + t, settings.theme === t);
+        el.classList.toggle('sp-theme-' + t, settings.theme === t);
     }
     if (settings.useCustomAccent && settings.accentColor) {
-        block.style.setProperty('--sc-accent', settings.accentColor);
+        el.style.setProperty('--sp-accent', settings.accentColor);
     } else {
-        block.style.removeProperty('--sc-accent');
+        el.style.removeProperty('--sp-accent');
     }
+    // Normal (unselected) card color — a visible-but-soft tint of the
+    // chosen color, overriding the theme's default card background.
     if (settings.useCustomCardColor && settings.cardColor) {
-        block.style.setProperty('--sc-card-bg',
+        el.style.setProperty('--sp-card-bg',
             `color-mix(in srgb, ${settings.cardColor} 20%, transparent)`);
-        block.style.setProperty('--sc-card-bg-hover',
+        el.style.setProperty('--sp-card-bg-hover',
             `color-mix(in srgb, ${settings.cardColor} 32%, transparent)`);
     } else {
-        block.style.removeProperty('--sc-card-bg');
-        block.style.removeProperty('--sc-card-bg-hover');
+        el.style.removeProperty('--sp-card-bg');
+        el.style.removeProperty('--sp-card-bg-hover');
     }
-    sizeAvatars();
+}
+
+/** Apply theme to both the grid block and the current-persona bar. */
+function applyTheme() {
+    applyThemeToEl(document.getElementById('user_avatar_block'));
+    applyThemeToEl(document.getElementById('sp-current-bar'));
+}
+
+/** Toggle the reskin class on the persona block. */
+function applyEnabledState() {
+    const settings = getSettings();
+    const block = document.getElementById('user_avatar_block');
+    if (!block) return;
+    block.classList.toggle('sp-enabled', !!settings.enabled);
+    if (!settings.enabled) {
+        removeCurrentBar();
+    } else {
+        syncCurrentBar();
+        applyTheme();
+    }
+}
+
+function removeCurrentBar() {
+    document.getElementById('sp-current-bar')?.remove();
 }
 
 /**
- * The card has overflow:hidden, which makes the browser treat its
- * min-content height as ~0 — so the grid row never grows to fit the
- * avatar and the photo gets clipped. Percentage widths also drop out
- * of intrinsic row sizing. We fix both in JS: set each avatar's height
- * in px from its rendered width, then pin each card's height to its
- * real content height (scrollHeight), which ignores the clip.
+ * Build / update the "current persona" bar and place it above the
+ * persona list, right under the search row. Reads directly from the
+ * card that ST has already marked `.selected`, so it needs no access
+ * to internal persona state.
  */
-function sizeAvatars() {
-    const block = document.getElementById(BLOCK_ID);
-    if (!block || !block.classList.contains('sc-enabled')) return;
-    const ratio = getSettings().theme === 'magazine' ? 4 / 3 : 1; // h/w
-    const cards = Array.from(block.querySelectorAll('.entity_block'));
-    if (!cards.length) return;
-
-    // Pass 1: reset, then set avatar heights from measured width.
-    for (const card of cards) {
-        card.style.removeProperty('height');
-        const av = card.querySelector('.avatar');
-        if (!av) continue;
-        av.style.removeProperty('height');
-        const w = av.offsetWidth;
-        if (w > 0) {
-            av.style.setProperty('height', Math.round(w * ratio) + 'px', 'important');
-        }
-    }
-    // Pass 2: magazine keeps overflow:hidden (photo bg + overlaid
-    // caption), so it needs an explicit height. Other themes use
-    // overflow:visible and grow to fit avatar + name on their own.
-    if (getSettings().theme === 'magazine') {
-        for (const card of cards) {
-            const av = card.querySelector('.avatar');
-            const h = av ? av.offsetHeight : 0;
-            if (h > 0) card.style.setProperty('height', h + 'px', 'important');
-        }
-    }
-}
-
-/** Toggle the reskin on/off. */
-function applyEnabledState() {
+function syncCurrentBar() {
     const settings = getSettings();
-    const block = document.getElementById(BLOCK_ID);
-    if (!block) return;
-    block.classList.toggle('sc-enabled', !!settings.enabled);
-    if (settings.enabled) applyTheme();
+    const block = document.getElementById('user_avatar_block');
+    if (!block || !settings.enabled || !settings.showCurrentBar) {
+        removeCurrentBar();
+        return;
+    }
+
+    const selected = block.querySelector('.avatar-container.selected');
+    if (!selected) {
+        removeCurrentBar();
+        return;
+    }
+
+    const imgSrc = selected.querySelector('.avatar img')?.getAttribute('src') || '';
+    const name = selected.querySelector('.ch_name')?.textContent?.trim() || '';
+
+    let bar = document.getElementById('sp-current-bar');
+    if (!bar) {
+        bar = document.createElement('div');
+        bar.id = 'sp-current-bar';
+        bar.innerHTML = `
+            <img class="sp-current-avatar" src="" alt="">
+            <div class="sp-current-text">
+                <div class="sp-current-label" data-i18n="Current persona">Current persona</div>
+                <div class="sp-current-name"></div>
+            </div>
+        `;
+        // Clicking the bar scrolls to the active card.
+        bar.addEventListener('click', () => {
+            const active = block.querySelector('.avatar-container.selected');
+            active?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
+        // Insert directly before the persona list block.
+        block.parentElement?.insertBefore(bar, block);
+        applyThemeToEl(bar);
+    }
+
+    const barImg = bar.querySelector('.sp-current-avatar');
+    if (barImg.getAttribute('src') !== imgSrc) barImg.setAttribute('src', imgSrc);
+    const barName = bar.querySelector('.sp-current-name');
+    if (barName.textContent !== name) barName.textContent = name;
 }
 
-/** The list re-renders on search / folder nav; keep classes applied. */
+/** Watch the persona list for re-renders / selection changes. */
 function observeBlock() {
-    const block = document.getElementById(BLOCK_ID);
+    const block = document.getElementById('user_avatar_block');
     if (!block) return;
 
-    // Re-apply classes + resize avatars when the list content changes.
-    const mo = new MutationObserver(() => {
+    const observer = new MutationObserver(() => {
+        // Re-apply classes in case ST rebuilt the block, then resync.
         const settings = getSettings();
-        block.classList.toggle('sc-enabled', !!settings.enabled);
-        if (settings.enabled) applyTheme();
+        block.classList.toggle('sp-enabled', !!settings.enabled);
+        applyTheme();
+        syncCurrentBar();
     });
-    mo.observe(block, {
+
+    observer.observe(block, {
         childList: true,
+        subtree: true,
         attributes: true,
         attributeFilter: ['class'],
     });
-
-    // Fires when the panel actually gains a size (i.e. when it opens),
-    // which is exactly when avatar widths become measurable. This is
-    // the reliable trigger the click/mutation handlers were missing.
-    if (window.ResizeObserver) {
-        const ro = new ResizeObserver(() => {
-            if (getSettings().enabled) sizeAvatars();
-        });
-        ro.observe(block);
-    }
 }
 
 async function addSettingsPanel() {
-    if (document.getElementById('sc-enabled')) return;
+    // Never add the panel twice.
+    if (document.getElementById('sp-enabled')) return;
+
     const settings = getSettings();
     const html = `
-    <div class="simple-character-settings">
+    <div class="simple-persona-settings">
         <div class="inline-drawer">
             <div class="inline-drawer-toggle inline-drawer-header">
-                <b>Simple Character</b>
+                <b>Simple Persona</b>
                 <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
             </div>
             <div class="inline-drawer-content">
-                <label class="checkbox_label" for="sc-enabled">
-                    <input id="sc-enabled" type="checkbox">
+                <label class="checkbox_label" for="sp-enabled">
+                    <input id="sp-enabled" type="checkbox">
                     <span>Enable card grid</span>
+                </label>
+                <label class="checkbox_label" for="sp-show-current-bar">
+                    <input id="sp-show-current-bar" type="checkbox">
+                    <span>Show "current persona" bar on top</span>
                 </label>
 
                 <div class="flex-container flexFlowColumn" style="margin-top:8px;">
-                    <label for="sc-theme"><small>Theme preset</small></label>
-                    <select id="sc-theme" class="text_pole">
+                    <label for="sp-theme"><small>Theme preset</small></label>
+                    <select id="sp-theme" class="text_pole">
                         <option value="soft">Soft (default)</option>
                         <option value="paper">Paper</option>
                         <option value="polaroid">Polaroid</option>
@@ -162,27 +189,27 @@ async function addSettingsPanel() {
                     </select>
                 </div>
 
-                <label class="checkbox_label" for="sc-use-accent" style="margin-top:8px;">
-                    <input id="sc-use-accent" type="checkbox">
+                <label class="checkbox_label" for="sp-use-accent" style="margin-top:8px;">
+                    <input id="sp-use-accent" type="checkbox">
                     <span>Custom selected-card color</span>
                 </label>
-                <div class="flex-container alignItemsCenter" style="gap:8px;">
-                    <input id="sc-accent-color" type="color" style="width:42px;height:28px;padding:0;border:none;background:none;cursor:pointer;">
+                <div class="flex-container alignItemsCenter" id="sp-accent-row" style="gap:8px;">
+                    <input id="sp-accent-color" type="color" style="width:42px;height:28px;padding:0;border:none;background:none;cursor:pointer;">
                     <small class="text_muted">Selected card (glow, border &amp; dot)</small>
                 </div>
 
-                <label class="checkbox_label" for="sc-use-card" style="margin-top:8px;">
-                    <input id="sc-use-card" type="checkbox">
+                <label class="checkbox_label" for="sp-use-card" style="margin-top:8px;">
+                    <input id="sp-use-card" type="checkbox">
                     <span>Custom normal-card color</span>
                 </label>
-                <div class="flex-container alignItemsCenter" style="gap:8px;">
-                    <input id="sc-card-color" type="color" style="width:42px;height:28px;padding:0;border:none;background:none;cursor:pointer;">
+                <div class="flex-container alignItemsCenter" id="sp-card-row" style="gap:8px;">
+                    <input id="sp-card-color" type="color" style="width:42px;height:28px;padding:0;border:none;background:none;cursor:pointer;">
                     <small class="text_muted">All unselected cards</small>
                 </div>
 
                 <small class="text_muted" style="display:block;margin-top:8px;">
-                    Restyles the native character list into a card grid.
-                    All original features keep working.
+                    Restyles the native Persona Management panel into a card
+                    grid. All original features keep working.
                 </small>
             </div>
         </div>
@@ -190,24 +217,33 @@ async function addSettingsPanel() {
 
     $('#extensions_settings2').append(html);
 
-    const $enabled = $('#sc-enabled');
-    const $theme = $('#sc-theme');
-    const $useAccent = $('#sc-use-accent');
-    const $accent = $('#sc-accent-color');
-    const $useCard = $('#sc-use-card');
-    const $card = $('#sc-card-color');
+    const $enabled = $('#sp-enabled');
+    const $bar = $('#sp-show-current-bar');
+    const $theme = $('#sp-theme');
+    const $useAccent = $('#sp-use-accent');
+    const $accent = $('#sp-accent-color');
+    const $useCard = $('#sp-use-card');
+    const $card = $('#sp-card-color');
 
     $enabled.prop('checked', settings.enabled);
+    $bar.prop('checked', settings.showCurrentBar);
     $theme.val(settings.theme);
     $useAccent.prop('checked', settings.useCustomAccent);
-    $accent.val(settings.accentColor).prop('disabled', !settings.useCustomAccent);
+    $accent.val(settings.accentColor);
+    $accent.prop('disabled', !settings.useCustomAccent);
     $useCard.prop('checked', settings.useCustomCardColor);
-    $card.val(settings.cardColor).prop('disabled', !settings.useCustomCardColor);
+    $card.val(settings.cardColor);
+    $card.prop('disabled', !settings.useCustomCardColor);
 
     $enabled.on('change', function () {
         settings.enabled = $(this).prop('checked');
         saveSettingsDebounced();
         applyEnabledState();
+    });
+    $bar.on('change', function () {
+        settings.showCurrentBar = $(this).prop('checked');
+        saveSettingsDebounced();
+        syncCurrentBar();
     });
     $theme.on('change', function () {
         settings.theme = $(this).val();
@@ -239,31 +275,35 @@ async function addSettingsPanel() {
 }
 
 export async function init() {
-    if (window.__simpleCharacterInit) return;
-    window.__simpleCharacterInit = true;
+    // Guard against double-init: the manifest `activate` hook and the
+    // jQuery bootstrap below can both fire depending on ST version.
+    if (window.__simplePersonaInit) return;
+    window.__simplePersonaInit = true;
 
     getSettings();
     await addSettingsPanel();
+
+    // The persona drawer may not be in the DOM until first opened, so
+    // apply lazily and also when the drawer button is clicked.
     applyEnabledState();
     observeBlock();
 
-    // Re-apply when the character list panel is opened.
-    $(document).on('click', '#rightNavDrawerIcon, #rm_button_characters', () => {
-        setTimeout(applyEnabledState, 60);
-    });
-
-    // Avatar heights are pixel-based, so recompute on resize.
-    let resizeTimer = null;
-    window.addEventListener('resize', () => {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(sizeAvatars, 120);
+    $(document).on('click', '#persona-management-button .drawer-toggle', () => {
+        // Give ST a tick to render the list, then style it.
+        setTimeout(() => {
+            applyEnabledState();
+            applyTheme();
+            syncCurrentBar();
+        }, 50);
     });
 }
 
+// Some ST versions call the manifest hook, some just import the module.
+// init() is self-guarding, so calling it from both paths is safe.
 jQuery(async () => {
     try {
         await init();
     } catch (e) {
-        console.error('[Simple Character] init failed:', e);
+        console.error('[Simple Persona] init failed:', e);
     }
 });
