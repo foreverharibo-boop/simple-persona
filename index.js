@@ -2,7 +2,7 @@ import { extension_settings } from '../../../extensions.js';
 import { saveSettingsDebounced } from '../../../../script.js';
 
 const MODULE = 'simplePersona';
-const THEMES = ['soft', 'paper', 'polaroid', 'circle', 'magazine', 'sticker', 'tcg', 'glass', 'bubble-pink', 'bubble-sky', 'heart-pink', 'heart-sky'];
+const THEMES = ['soft', 'paper', 'polaroid', 'circle', 'magazine', 'sticker', 'tcg', 'glass', 'bubble-pink', 'bubble-sky', 'heart-pink', 'heart-sky', 'bare-white', 'bare-black'];
 
 const defaultSettings = {
     enabled: true,
@@ -184,6 +184,8 @@ async function addSettingsPanel() {
                         <option value="bubble-sky">Bubble Sky 🫧💙</option>
                         <option value="heart-pink">Heart Pink 💕</option>
                         <option value="heart-sky">Heart Sky 💙</option>
+                        <option value="bare-white">Bare White ⬜</option>
+                        <option value="bare-black">Bare Black ⬛</option>
                     </select>
                 </div>
 

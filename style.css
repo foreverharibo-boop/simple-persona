@@ -192,6 +192,40 @@
     --sp-text: #3d8fd6;
 }
 
+/* ---- Bare White ⬜ (no borders/shadows) ------------------ */
+#user_avatar_block.sp-enabled.sp-theme-bare-white,
+#sp-current-bar.sp-theme-bare-white {
+    --sp-radius: 12px;
+    --sp-avatar-corner: 14px;
+    --sp-accent: #111111;
+    --sp-card-bg: transparent;
+    --sp-card-bg-hover: transparent;
+    --sp-card-bg-active: transparent;
+    --sp-border: transparent;
+    --sp-border-hover: transparent;
+    --sp-border-width: 0;
+    --sp-glow: none;
+    --sp-name-weight: 400;
+    --sp-text: #222222;
+}
+
+/* ---- Bare Black ⬛ (no borders/shadows) ------------------- */
+#user_avatar_block.sp-enabled.sp-theme-bare-black,
+#sp-current-bar.sp-theme-bare-black {
+    --sp-radius: 12px;
+    --sp-avatar-corner: 14px;
+    --sp-accent: #ffffff;
+    --sp-card-bg: transparent;
+    --sp-card-bg-hover: transparent;
+    --sp-card-bg-active: transparent;
+    --sp-border: transparent;
+    --sp-border-hover: transparent;
+    --sp-border-width: 0;
+    --sp-glow: none;
+    --sp-name-weight: 400;
+    --sp-text: #eeeeee;
+}
+
 /* ---- The grid container ---------------------------------- */
 #user_avatar_block.sp-enabled {
     display: grid;
@@ -697,4 +731,53 @@
     font-size: 14px;
     top: 2px;
     right: 4px;
+}
+
+/* ============================================================
+   BARE MINIMAL — White / Black (photo + name only)
+   No card background, border, or shadow. Selection = the
+   unselected cards dim slightly and the active name goes bold.
+   ============================================================ */
+#user_avatar_block.sp-enabled.sp-theme-bare-white {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 14px 10px;
+}
+#user_avatar_block.sp-enabled.sp-theme-bare-black {
+    background: #121212;
+    border-radius: 12px;
+    padding: 14px 10px;
+}
+
+/* strip all card chrome */
+#user_avatar_block.sp-enabled.sp-theme-bare-white .avatar-container,
+#user_avatar_block.sp-enabled.sp-theme-bare-black .avatar-container {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    transition: opacity 0.16s ease;
+}
+/* unselected cards fade a little */
+#user_avatar_block.sp-enabled.sp-theme-bare-white .avatar-container {
+    opacity: 0.55;
+}
+#user_avatar_block.sp-enabled.sp-theme-bare-black .avatar-container {
+    opacity: 0.5;
+}
+#user_avatar_block.sp-enabled.sp-theme-bare-white .avatar-container:hover,
+#user_avatar_block.sp-enabled.sp-theme-bare-black .avatar-container:hover,
+#user_avatar_block.sp-enabled.sp-theme-bare-white .avatar-container.selected,
+#user_avatar_block.sp-enabled.sp-theme-bare-black .avatar-container.selected {
+    opacity: 1;
+    transform: none;
+}
+/* active name goes bold */
+#user_avatar_block.sp-enabled.sp-theme-bare-white .avatar-container.selected .ch_name,
+#user_avatar_block.sp-enabled.sp-theme-bare-black .avatar-container.selected .ch_name {
+    font-weight: 700;
+}
+/* no selected dot */
+#user_avatar_block.sp-enabled.sp-theme-bare-white .avatar-container.selected::after,
+#user_avatar_block.sp-enabled.sp-theme-bare-black .avatar-container.selected::after {
+    display: none;
 }
