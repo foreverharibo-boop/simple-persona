@@ -757,12 +757,10 @@
     box-shadow: none !important;
     transition: opacity 0.16s ease;
 }
-/* unselected cards fade a little */
-#user_avatar_block.sp-enabled.sp-theme-bare-white .avatar-container {
-    opacity: 0.55;
-}
+/* no dimming — all cards full opacity; selection = ring + bold name */
+#user_avatar_block.sp-enabled.sp-theme-bare-white .avatar-container,
 #user_avatar_block.sp-enabled.sp-theme-bare-black .avatar-container {
-    opacity: 0.5;
+    opacity: 1;
 }
 #user_avatar_block.sp-enabled.sp-theme-bare-white .avatar-container:hover,
 #user_avatar_block.sp-enabled.sp-theme-bare-black .avatar-container:hover,
@@ -770,6 +768,20 @@
 #user_avatar_block.sp-enabled.sp-theme-bare-black .avatar-container.selected {
     opacity: 1;
     transform: none;
+}
+/* remove ST's default photo border/shadow entirely */
+#user_avatar_block.sp-enabled.sp-theme-bare-white .avatar-container .avatar,
+#user_avatar_block.sp-enabled.sp-theme-bare-black .avatar-container .avatar,
+#user_avatar_block.sp-enabled.sp-theme-bare-white .avatar-container .avatar img,
+#user_avatar_block.sp-enabled.sp-theme-bare-black .avatar-container .avatar img {
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+/* selected persona: accent ring on the photo only */
+#user_avatar_block.sp-enabled.sp-theme-bare-white .avatar-container.selected .avatar,
+#user_avatar_block.sp-enabled.sp-theme-bare-black .avatar-container.selected .avatar {
+    box-shadow: 0 0 0 2.5px var(--sp-accent) !important;
 }
 /* active name goes bold */
 #user_avatar_block.sp-enabled.sp-theme-bare-white .avatar-container.selected .ch_name,
