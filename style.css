@@ -793,3 +793,13 @@
 #user_avatar_block.sp-enabled.sp-theme-bare-black .avatar-container.selected::after {
     display: none;
 }
+
+/* Bare Black: brighter title so it stays readable on dark bg */
+#user_avatar_block.sp-enabled.sp-theme-bare-black .ch_additional_info {
+    color: #b8b8b8 !important;
+    opacity: 1 !important;
+}
+#user_avatar_block.sp-enabled.sp-theme-bare-white .ch_additional_info {
+    color: #999999 !important;
+    opacity: 1 !important;
+}
