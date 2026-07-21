@@ -12,6 +12,8 @@ const defaultSettings = {
     accentColor: '#c8a0e6',
     useCustomCardColor: false,
     cardColor: '#8a8aa0',
+    cardMin: 105,
+    avatarScale: 96,
 };
 
 function getSettings() {
@@ -50,6 +52,9 @@ function applyThemeToEl(el) {
         el.style.removeProperty('--sp-card-bg');
         el.style.removeProperty('--sp-card-bg-hover');
     }
+    // Size controls: card min-width (density) + avatar scale.
+    el.style.setProperty('--sp-card-min', (settings.cardMin || 105) + 'px');
+    el.style.setProperty('--sp-avatar-scale', (settings.avatarScale || 96) + '%');
 }
 
 /** Apply theme to both the grid block and the current-persona bar. */
@@ -207,6 +212,16 @@ async function addSettingsPanel() {
                     <small class="text_muted">All unselected cards</small>
                 </div>
 
+                <hr style="margin:10px 0; opacity:0.2;">
+                <div class="flex-container flexFlowColumn" style="margin-top:4px;">
+                    <label for="sp-card-min"><small>Card size (dense ↔ large)</small></label>
+                    <input id="sp-card-min" type="range" min="70" max="180" step="5" class="text_pole" style="width:100%;">
+                </div>
+                <div class="flex-container flexFlowColumn" style="margin-top:6px;">
+                    <label for="sp-avatar-scale"><small>Avatar size</small></label>
+                    <input id="sp-avatar-scale" type="range" min="60" max="100" step="2" class="text_pole" style="width:100%;">
+                </div>
+
                 <small class="text_muted" style="display:block;margin-top:8px;">
                     Restyles the native Persona Management panel into a card
                     grid. All original features keep working.
@@ -269,6 +284,21 @@ async function addSettingsPanel() {
     });
     $card.on('input', function () {
         settings.cardColor = $(this).val();
+        saveSettingsDebounced();
+        applyTheme();
+    });
+
+    const $cardMin = $('#sp-card-min');
+    const $avatarScale = $('#sp-avatar-scale');
+    $cardMin.val(settings.cardMin);
+    $avatarScale.val(settings.avatarScale);
+    $cardMin.on('input', function () {
+        settings.cardMin = parseInt($(this).val(), 10);
+        saveSettingsDebounced();
+        applyTheme();
+    });
+    $avatarScale.on('input', function () {
+        settings.avatarScale = parseInt($(this).val(), 10);
         saveSettingsDebounced();
         applyTheme();
     });
