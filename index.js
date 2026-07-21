@@ -14,6 +14,7 @@ const defaultSettings = {
     cardColor: '#8a8aa0',
     cardMin: 105,
     avatarScale: 96,
+    avatarVh: 100,
 };
 
 function getSettings() {
@@ -55,6 +56,7 @@ function applyThemeToEl(el) {
     // Size controls: card min-width (density) + avatar scale.
     el.style.setProperty('--sp-card-min', (settings.cardMin || 105) + 'px');
     el.style.setProperty('--sp-avatar-scale', (settings.avatarScale || 96) + '%');
+    el.style.setProperty('--sp-avatar-vh', (settings.avatarVh || 100));
 }
 
 /** Apply theme to both the grid block and the current-persona bar. */
@@ -221,6 +223,10 @@ async function addSettingsPanel() {
                     <label for="sp-avatar-scale"><small>Avatar size</small></label>
                     <input id="sp-avatar-scale" type="range" min="60" max="100" step="2" class="text_pole" style="width:100%;">
                 </div>
+                <div class="flex-container flexFlowColumn" style="margin-top:6px;">
+                    <label for="sp-avatar-vh"><small>Card height (compact ↔ square)</small></label>
+                    <input id="sp-avatar-vh" type="range" min="45" max="100" step="5" class="text_pole" style="width:100%;">
+                </div>
 
                 <small class="text_muted" style="display:block;margin-top:8px;">
                     Restyles the native Persona Management panel into a card
@@ -290,8 +296,10 @@ async function addSettingsPanel() {
 
     const $cardMin = $('#sp-card-min');
     const $avatarScale = $('#sp-avatar-scale');
+    const $avatarVh = $('#sp-avatar-vh');
     $cardMin.val(settings.cardMin);
     $avatarScale.val(settings.avatarScale);
+    $avatarVh.val(settings.avatarVh);
     $cardMin.on('input', function () {
         settings.cardMin = parseInt($(this).val(), 10);
         saveSettingsDebounced();
@@ -299,6 +307,11 @@ async function addSettingsPanel() {
     });
     $avatarScale.on('input', function () {
         settings.avatarScale = parseInt($(this).val(), 10);
+        saveSettingsDebounced();
+        applyTheme();
+    });
+    $avatarVh.on('input', function () {
+        settings.avatarVh = parseInt($(this).val(), 10);
         saveSettingsDebounced();
         applyTheme();
     });
