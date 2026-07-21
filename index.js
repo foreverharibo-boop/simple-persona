@@ -215,7 +215,7 @@ async function addSettingsPanel() {
                 <hr style="margin:10px 0; opacity:0.2;">
                 <div class="flex-container flexFlowColumn" style="margin-top:4px;">
                     <label for="sp-card-min"><small>Card size (dense ↔ large)</small></label>
-                    <input id="sp-card-min" type="range" min="30" max="300" step="5" class="text_pole" style="width:100%;">
+                    <input id="sp-card-min" type="range" min="30" max="200" step="5" class="text_pole" style="width:100%;">
                 </div>
                 <div class="flex-container flexFlowColumn" style="margin-top:6px;">
                     <label for="sp-avatar-scale"><small>Avatar size</small></label>
