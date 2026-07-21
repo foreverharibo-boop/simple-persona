@@ -317,7 +317,7 @@
 #user_avatar_block.sp-enabled .avatar-container .avatar {
     width: var(--sp-avatar-scale, 100%) !important;
     height: auto !important;
-    aspect-ratio: 100 / var(--sp-avatar-vh, 100);
+    aspect-ratio: 1 / 1;
     border-radius: var(--sp-avatar-corner) !important;
     overflow: hidden;
     align-self: center;
@@ -818,26 +818,32 @@
 }
 
 /* ============================================================
-   ROUNDED SQUARE — square photo (rounded), name below it
-   The photo is a clean 1:1 rounded square; the name sits under it
-   like the other card themes (no dark overlay). Ignores vh.
+   ROUNDED SQUARE — the WHOLE card (photo + name + memo) is one
+   1:1 rounded square. Photo sits on top, text fills the space
+   below, all inside a square pill. Other themes untouched.
    ============================================================ */
 #user_avatar_block.sp-enabled.sp-theme-square .avatar-container {
-    padding: 8px 6px 10px;
-    gap: 7px;
+    aspect-ratio: 1 / 1;
     height: auto;
-    background: transparent;
+    overflow: hidden;
+    border-radius: var(--sp-radius);
+    padding: 8px 8px 6px;
+    gap: 6px;
     justify-content: flex-start;
 }
 #user_avatar_block.sp-enabled.sp-theme-square .avatar-container .avatar {
     width: 100% !important;
-    height: auto !important;
-    aspect-ratio: 1 / 1 !important;
-    border-radius: var(--sp-avatar-corner) !important;
+    height: 66% !important;
+    aspect-ratio: auto !important;
+    border-radius: calc(var(--sp-avatar-corner) - 4px) !important;
     margin: 0;
+    flex: 0 0 auto;
 }
 #user_avatar_block.sp-enabled.sp-theme-square .avatar-container .avatar img {
-    border-radius: var(--sp-avatar-corner) !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover;
+    border-radius: calc(var(--sp-avatar-corner) - 4px) !important;
 }
 #user_avatar_block.sp-enabled.sp-theme-square .avatar-container.selected .avatar {
     box-shadow: 0 0 0 2.5px var(--sp-accent),
