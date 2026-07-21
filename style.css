@@ -23,7 +23,7 @@
     --sp-name-weight: 600;
     --sp-text: var(--SmartThemeBodyColor);
     --sp-card-min: 105px;
-    --sp-avatar-scale: 96%;
+    --sp-avatar-scale: 100%;
     --sp-avatar-vh: 100;
 }
 
@@ -305,7 +305,7 @@
    specificity !important. Size scales with the card but caps out,
    so 4 columns still look generous. */
 #user_avatar_block.sp-enabled .avatar-container .avatar {
-    width: min(var(--sp-avatar-scale, 96%), 340px) !important;
+    width: var(--sp-avatar-scale, 100%) !important;
     height: auto !important;
     aspect-ratio: 100 / var(--sp-avatar-vh, 100);
     border-radius: var(--sp-avatar-corner) !important;

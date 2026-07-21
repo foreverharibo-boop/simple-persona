@@ -13,7 +13,7 @@ const defaultSettings = {
     useCustomCardColor: false,
     cardColor: '#8a8aa0',
     cardMin: 105,
-    avatarScale: 96,
+    avatarScale: 100,
     avatarVh: 100,
 };
 
@@ -216,16 +216,8 @@ async function addSettingsPanel() {
 
                 <hr style="margin:10px 0; opacity:0.2;">
                 <div class="flex-container flexFlowColumn" style="margin-top:4px;">
-                    <label for="sp-card-min"><small>Card size (dense ↔ large)</small></label>
+                    <label for="sp-card-min"><small>Size (small ↔ large)</small></label>
                     <input id="sp-card-min" type="range" min="30" max="200" step="5" class="text_pole" style="width:100%;">
-                </div>
-                <div class="flex-container flexFlowColumn" style="margin-top:6px;">
-                    <label for="sp-avatar-scale"><small>Avatar size</small></label>
-                    <input id="sp-avatar-scale" type="range" min="60" max="100" step="2" class="text_pole" style="width:100%;">
-                </div>
-                <div class="flex-container flexFlowColumn" style="margin-top:6px;">
-                    <label for="sp-avatar-vh"><small>Card height (compact ↔ square)</small></label>
-                    <input id="sp-avatar-vh" type="range" min="45" max="100" step="5" class="text_pole" style="width:100%;">
                 </div>
 
                 <small class="text_muted" style="display:block;margin-top:8px;">
@@ -295,23 +287,9 @@ async function addSettingsPanel() {
     });
 
     const $cardMin = $('#sp-card-min');
-    const $avatarScale = $('#sp-avatar-scale');
-    const $avatarVh = $('#sp-avatar-vh');
     $cardMin.val(settings.cardMin);
-    $avatarScale.val(settings.avatarScale);
-    $avatarVh.val(settings.avatarVh);
     $cardMin.on('input', function () {
         settings.cardMin = parseInt($(this).val(), 10);
-        saveSettingsDebounced();
-        applyTheme();
-    });
-    $avatarScale.on('input', function () {
-        settings.avatarScale = parseInt($(this).val(), 10);
-        saveSettingsDebounced();
-        applyTheme();
-    });
-    $avatarVh.on('input', function () {
-        settings.avatarVh = parseInt($(this).val(), 10);
         saveSettingsDebounced();
         applyTheme();
     });
