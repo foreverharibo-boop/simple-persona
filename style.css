@@ -195,6 +195,16 @@
     --sp-text: #3d8fd6;
 }
 
+/* ---- Rounded Square 🔲 (square card, name overlaid) ------ */
+#user_avatar_block.sp-enabled.sp-theme-square,
+#sp-current-bar.sp-theme-square {
+    --sp-radius: 18px;
+    --sp-avatar-corner: 18px;
+    --sp-accent: var(--SmartThemeQuoteColor, #7b68ee);
+    --sp-text: #ffffff;
+    --sp-name-weight: 700;
+}
+
 /* ---- Bare White ⬜ (no borders/shadows) ------------------ */
 #user_avatar_block.sp-enabled.sp-theme-bare-white,
 #sp-current-bar.sp-theme-bare-white {
@@ -805,4 +815,64 @@
 #user_avatar_block.sp-enabled.sp-theme-bare-white .ch_additional_info {
     color: #999999 !important;
     opacity: 1 !important;
+}
+
+/* ============================================================
+   ROUNDED SQUARE — square card, photo fills, name overlaid
+   The whole card is a 1:1 rounded square (not tall). Ignores the
+   card-height/vh setting on purpose.
+   ============================================================ */
+#user_avatar_block.sp-enabled.sp-theme-square .avatar-container {
+    padding: 0;
+    height: auto;
+    overflow: hidden;
+    border-radius: var(--sp-radius);
+    justify-content: flex-start;
+    background: transparent;
+}
+#user_avatar_block.sp-enabled.sp-theme-square .avatar-container .avatar {
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 1 / 1 !important;
+    border-radius: 0 !important;
+    margin: 0;
+}
+#user_avatar_block.sp-enabled.sp-theme-square .avatar-container .avatar img {
+    border-radius: 0 !important;
+}
+#user_avatar_block.sp-enabled.sp-theme-square .character_select_container {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+    width: 100%;
+    padding: 22px 8px 7px;
+    box-sizing: border-box;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.72), transparent);
+    text-align: center !important;
+    align-items: center !important;
+}
+#user_avatar_block.sp-enabled.sp-theme-square .character_name_block {
+    align-items: center !important;
+    text-align: center !important;
+}
+#user_avatar_block.sp-enabled.sp-theme-square .ch_name,
+#user_avatar_block.sp-enabled.sp-theme-square .ch_additional_info {
+    color: #ffffff !important;
+    text-align: center !important;
+    -webkit-text-stroke: 0.3px rgba(0, 0, 0, 0.6);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
+    paint-order: stroke fill;
+}
+#user_avatar_block.sp-enabled.sp-theme-square .ch_additional_info {
+    opacity: 0.9;
+}
+#user_avatar_block.sp-enabled.sp-theme-square .avatar-container.selected {
+    box-shadow: 0 0 0 2.5px var(--sp-accent),
+        0 0 14px color-mix(in srgb, var(--sp-accent) 55%, transparent);
+}
+#user_avatar_block.sp-enabled.sp-theme-square .avatar-container.selected::after {
+    top: 8px;
+    right: 8px;
 }
