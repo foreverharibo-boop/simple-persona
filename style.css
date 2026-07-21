@@ -231,7 +231,7 @@
 /* ---- The grid container ---------------------------------- */
 #user_avatar_block.sp-enabled {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(var(--sp-card-min, 105px), 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(var(--sp-card-min, 105px), 100%), 1fr));
     grid-auto-rows: 1fr;
     gap: var(--sp-gap);
     padding: 4px 2px;
