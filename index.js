@@ -30,33 +30,44 @@ function getSettings() {
     return extension_settings[MODULE];
 }
 
+/** Write a class / CSS var only when it actually changes (avoids needless style recalcs). */
+function setVar(el, name, val) {
+    if (el.style.getPropertyValue(name) !== val) el.style.setProperty(name, val);
+}
+function clearVar(el, name) {
+    if (el.style.getPropertyValue(name)) el.style.removeProperty(name);
+}
+function setClass(el, cls, on) {
+    if (el.classList.contains(cls) !== on) el.classList.toggle(cls, on);
+}
+
 /** Apply the current theme preset + accent color to one element. */
 function applyThemeToEl(el) {
     if (!el) return;
     const settings = getSettings();
     for (const t of THEMES) {
-        el.classList.toggle('sp-theme-' + t, settings.theme === t);
+        setClass(el, 'sp-theme-' + t, settings.theme === t);
     }
     if (settings.useCustomAccent && settings.accentColor) {
-        el.style.setProperty('--sp-accent', settings.accentColor);
+        setVar(el, '--sp-accent', settings.accentColor);
     } else {
-        el.style.removeProperty('--sp-accent');
+        clearVar(el, '--sp-accent');
     }
     // Normal (unselected) card color — a visible-but-soft tint of the
     // chosen color, overriding the theme's default card background.
     if (settings.useCustomCardColor && settings.cardColor) {
-        el.style.setProperty('--sp-card-bg',
+        setVar(el, '--sp-card-bg',
             `color-mix(in srgb, ${settings.cardColor} 20%, transparent)`);
-        el.style.setProperty('--sp-card-bg-hover',
+        setVar(el, '--sp-card-bg-hover',
             `color-mix(in srgb, ${settings.cardColor} 32%, transparent)`);
     } else {
-        el.style.removeProperty('--sp-card-bg');
-        el.style.removeProperty('--sp-card-bg-hover');
+        clearVar(el, '--sp-card-bg');
+        clearVar(el, '--sp-card-bg-hover');
     }
     // Size controls: card min-width (density) + avatar scale.
-    el.style.setProperty('--sp-card-min', (settings.cardMin || 105) + 'px');
-    el.style.setProperty('--sp-avatar-scale', (settings.avatarScale || 96) + '%');
-    el.style.setProperty('--sp-avatar-vh', (settings.avatarVh || 100));
+    setVar(el, '--sp-card-min', (settings.cardMin || 105) + 'px');
+    setVar(el, '--sp-avatar-scale', (settings.avatarScale || 96) + '%');
+    setVar(el, '--sp-avatar-vh', String(settings.avatarVh || 100));
 }
 
 /** Apply theme to both the grid block and the current-persona bar. */
@@ -70,7 +81,7 @@ function applyEnabledState() {
     const settings = getSettings();
     const block = document.getElementById('user_avatar_block');
     if (!block) return;
-    block.classList.toggle('sp-enabled', !!settings.enabled);
+    setClass(block, 'sp-enabled', !!settings.enabled);
     if (!settings.enabled) {
         removeCurrentBar();
     } else {
@@ -133,17 +144,41 @@ function syncCurrentBar() {
     if (barName.textContent !== name) barName.textContent = name;
 }
 
+/**
+ * Coalesce refresh requests into ONE run per frame. ST re-renders the
+ * list card by card, which used to fire the full refresh over and over.
+ */
+let syncRaf = 0;
+function scheduleRefresh() {
+    if (syncRaf) return;
+    syncRaf = requestAnimationFrame(() => {
+        syncRaf = 0;
+        const block = document.getElementById('user_avatar_block');
+        if (!block) return;
+        const settings = getSettings();
+        setClass(block, 'sp-enabled', !!settings.enabled);
+        applyTheme();
+        syncCurrentBar();
+    });
+}
+
 /** Watch the persona list for re-renders / selection changes. */
 function observeBlock() {
     const block = document.getElementById('user_avatar_block');
     if (!block) return;
 
-    const observer = new MutationObserver(() => {
-        // Re-apply classes in case ST rebuilt the block, then resync.
-        const settings = getSettings();
-        block.classList.toggle('sp-enabled', !!settings.enabled);
-        applyTheme();
-        syncCurrentBar();
+    const observer = new MutationObserver((records) => {
+        // List content changed -> always refresh. Class changes only matter
+        // on the block itself (ST rebuilt it) or on a card (`selected`);
+        // class flips on other descendants are ignored.
+        for (const r of records) {
+            if (r.type === 'childList'
+                || r.target === block
+                || r.target.classList?.contains('avatar-container')) {
+                scheduleRefresh();
+                return;
+            }
+        }
     });
 
     observer.observe(block, {
@@ -311,11 +346,7 @@ export async function init() {
 
     $(document).on('click', '#persona-management-button .drawer-toggle', () => {
         // Give ST a tick to render the list, then style it.
-        setTimeout(() => {
-            applyEnabledState();
-            applyTheme();
-            syncCurrentBar();
-        }, 50);
+        setTimeout(applyEnabledState, 50);
     });
 }
 
