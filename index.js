@@ -2,7 +2,7 @@ import { extension_settings } from '../../../extensions.js';
 import { saveSettingsDebounced } from '../../../../script.js';
 
 const MODULE = 'simplePersona';
-const THEMES = ['soft', 'paper', 'polaroid', 'circle', 'magazine', 'sticker', 'tcg', 'glass', 'bubble-pink', 'bubble-sky', 'heart-pink', 'heart-sky', 'bare-white', 'bare-black'];
+const THEMES = ['soft', 'paper', 'polaroid', 'circle', 'magazine', 'sticker', 'tcg', 'glass', 'crystal-glass-light', 'crystal-glass-dark', 'bubble-pink', 'bubble-sky', 'heart-pink', 'heart-sky', 'bare-white', 'bare-black'];
 
 const defaultSettings = {
     enabled: true,
@@ -222,6 +222,8 @@ async function addSettingsPanel() {
                         <option value="sticker">Sticker</option>
                         <option value="tcg">Trading Card</option>
                         <option value="glass">Glass</option>
+                        <option value="crystal-glass-light">Crystal Glass Light</option>
+                        <option value="crystal-glass-dark">Crystal Glass Dark</option>
                         <option value="bubble-pink">Bubble Pink 🫧💕</option>
                         <option value="bubble-sky">Bubble Sky 🫧💙</option>
                         <option value="heart-pink">Heart Pink 💕</option>
